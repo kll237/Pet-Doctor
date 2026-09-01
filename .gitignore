@@ -14,3 +14,7 @@ vite.config.ts.timestamp-*.mjs
 
 # vite temp
 vite.config.ts.timestamp-*.mjs
+
+# verification artifacts
+screenshots/
+*-dom.html
