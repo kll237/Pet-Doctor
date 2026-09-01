@@ -11,3 +11,6 @@ coverage
 
 # vite temp
 vite.config.ts.timestamp-*.mjs
+
+# vite temp
+vite.config.ts.timestamp-*.mjs
