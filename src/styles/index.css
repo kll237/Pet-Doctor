@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #ece6dc;
+    color: #1f1b14;
+    font-family:
+      'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+      system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
+      sans-serif;
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  /* 手机壳：桌面端把页面居中到手机尺寸 */
+  .phone-shell {
+    @apply relative mx-auto h-full max-w-[420px] overflow-hidden bg-cream-50
+           shadow-[0_30px_80px_-20px_rgba(60,50,30,0.18)]
+           rounded-[2.2rem];
+  }
+  @media (max-width: 640px) {
+    .phone-shell {
+      @apply max-w-full rounded-none shadow-none;
+    }
+  }
+
+  .card {
+    @apply rounded-2xl bg-white shadow-card;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  /* 隐藏滚动条但保留滚动 */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* 渐变文字 */
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #F7B654 0%, #E08514 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* 玻璃面板 */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+  }
+
+  /* 状态颜色 */
+  .status-ok    { @apply bg-ok/10 text-ok; }
+  .status-warn  { @apply bg-warn/10 text-warn; }
+  .status-alert { @apply bg-alert/10 text-alert; }
+  .status-info  { @apply bg-info/10 text-info; }
+
+  /* 按钮 */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1 rounded-2xl bg-brand-500
+           px-4 py-3 font-medium text-white shadow-card
+           active:scale-[0.98] transition-transform;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1 rounded-2xl bg-cream-100
+           px-4 py-3 font-medium text-ink-700
+           active:scale-[0.98] transition-transform;
+  }
+}
+
+@layer utilities {
+  /* iPhone 安全区 */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  /* 让 fixed 在容器内定位 */
+  .abs { position: absolute; }
+}
