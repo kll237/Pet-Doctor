@@ -27,26 +27,29 @@ export default function ProfilePage() {
         <button onClick={() => nav(-1)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#3F392F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        <div className="text-lg font-semibold">宠物档案</div>
-        <button onClick={() => setEdit((v) => !v)} className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">
-          {edit ? '完成' : '编辑'}
+        <div className="text-base font-semibold">宠物档案</div>
+        <button onClick={() => setEdit((v) => !v)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center text-brand-500">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M14 3l7 7-10 10H4v-7L14 3z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+            <path d="M13 5l6 6" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
         </button>
       </div>
 
-      {/* 头像 + 名字（名字可编辑） */}
-      <div className="mt-3 rounded-3xl bg-white shadow-card px-5 py-4 flex items-center gap-3">
-        <div className="h-16 w-16 rounded-2xl bg-cream-100 grid place-items-center text-3xl shadow-card">{pet.avatar}</div>
-        <div className="flex-1 leading-tight">
+      {/* 头像 + 名字（奶油色卡） */}
+      <div className="mt-3 rounded-3xl bg-gradient-to-br from-cream-100 to-cream-50 shadow-card px-4 py-3.5 flex items-center gap-3">
+        <div className="h-14 w-14 rounded-2xl bg-white grid place-items-center text-3xl shadow-card">{pet.avatar}</div>
+        <div className="flex-1 leading-tight min-w-0">
           {edit ? (
             <input
               defaultValue={pet.name}
               onChange={(e) => updatePet({ name: e.target.value })}
-              className="text-base font-semibold bg-cream-50 rounded-xl px-2 py-1 outline-none w-full"
+              className="text-base font-semibold bg-white rounded-xl px-2 py-1 outline-none w-full"
             />
           ) : (
             <div className="text-base font-semibold">{pet.name}</div>
           )}
-          <div className="text-xs text-ink-400 mt-0.5">
+          <div className="text-[11px] text-ink-500 mt-0.5">
             {pet.ageLabel} <span className="mx-1 text-ink-300">·</span> {pet.weight}kg <span className="mx-1 text-ink-300">·</span> {pet.gender === 'male' ? '♂ 弟弟' : '♀ 妹妹'} <span className="mx-1 text-ink-300">·</span> {pet.neutered ? '已绝育' : '未绝育'}
           </div>
         </div>
@@ -137,9 +140,9 @@ export default function ProfilePage() {
 
       <button
         onClick={() => setEdit((v) => !v)}
-        className="mt-4 w-full rounded-2xl bg-brand-500 py-3 text-white font-medium shadow-card active:scale-[0.98]"
+        className="mt-4 w-full rounded-2xl bg-brand-500 py-3.5 text-sm text-white font-medium shadow-card active:scale-[0.98]"
       >
-        {edit ? '保存' : '编辑档案'}
+        {edit ? '保存档案' : '编辑档案'}
       </button>
 
       {adding && (

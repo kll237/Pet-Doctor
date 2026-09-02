@@ -13,15 +13,21 @@ const SPANS = [
   { key: 90, label: '90天' },
 ] as const
 
+/**
+ * 健康趋势 - 严格对齐原型图：
+ * - 左返回 / 中标题 / 右 "{pet.name} ▾"
+ * - 7/30/90 三段 tab（橙色高亮）
+ * - 健康评分趋势大卡（分数 + 涨跌 + 面积图）
+ * - 各项指标趋势 2×3 小卡
+ */
 export default function TrendPage() {
   const nav = useNavigate()
   const currentId = usePetStore((s) => s.currentId)
   const pet = useCurrentPet()
-  const [span, setSpan] = useState<7 | 30 | 90>(30)
+  const [span, setSpan] = useState<7 | 30 | 90>(7)
   const logs = useLogStore((s) => s.byPet[currentId] ?? {})
   const today = dayjs().format('YYYY-MM-DD')
 
-  // 生成模拟数据
   const series = useMemo(() => {
     const days: { date: string; overall: number; appetite: number; water: number; stool: number; energy: number; sleep: number; urine: number }[] = []
     const seed = span === 7 ? 86 : span === 30 ? 84 : 82
@@ -44,7 +50,7 @@ export default function TrendPage() {
     return days
   }, [span, logs, today])
 
-  const overallTrend = series[series.length - 1].overall - series[series.length - 8 >= 0 ? series.length - 8 : 0].overall
+  const overallTrend = series[series.length - 1].overall - series[Math.max(0, series.length - 8)].overall
 
   return (
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
@@ -52,17 +58,17 @@ export default function TrendPage() {
         <button onClick={() => nav(-1)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#3F392F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        <div className="text-lg font-semibold">健康趋势</div>
+        <div className="text-base font-semibold">健康趋势</div>
         <button className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">{pet.name} ▾</button>
       </div>
 
-      {/* 时间筛选 */}
+      {/* 时间筛选 tab */}
       <div className="mt-3 grid grid-cols-3 gap-2">
         {SPANS.map((s) => (
           <button
             key={s.key}
             onClick={() => setSpan(s.key as 7 | 30 | 90)}
-            className={`py-2 rounded-full text-sm ${span === s.key ? 'bg-brand-500 text-white shadow-card' : 'bg-white text-ink-700'}`}
+            className={`py-2 rounded-full text-sm font-medium ${span === s.key ? 'bg-brand-500 text-white shadow-card' : 'bg-white text-ink-700'}`}
           >
             {s.label}
           </button>
@@ -70,15 +76,15 @@ export default function TrendPage() {
       </div>
 
       {/* 综合评分卡片 */}
-      <div className="mt-4 rounded-3xl bg-white shadow-card px-5 py-4">
+      <div className="mt-3 rounded-3xl bg-white shadow-card px-4 py-4">
         <div className="text-sm font-semibold">健康评分趋势</div>
         <div className="mt-1 flex items-baseline gap-2">
           <span className="text-3xl font-bold text-ink-900">{series[series.length - 1].overall}</span>
-          <span className="text-sm text-warn">
+          <span className="text-xs text-warn">
             {overallTrend >= 0 ? '↗ 比上次 +' : '↘ 比上次 '}{Math.abs(overallTrend)}分
           </span>
         </div>
-        <div className="mt-2 h-40 -ml-2">
+        <div className="mt-2 h-36 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series}>
               <defs>
@@ -100,38 +106,36 @@ export default function TrendPage() {
         </div>
       </div>
 
-      {/* 各项指标趋势 */}
+      {/* 各项指标趋势 2×3 */}
       <div className="mt-4">
         <div className="text-sm font-semibold mb-2">各项指标趋势</div>
-        <div className="grid grid-cols-2 gap-3">
-          <MiniMetric title="食欲"   status="正常" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.appetite }))} color="#F4A12C" />
-          <MiniMetric title="饮水"   status="正常" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.water }))}    color="#3FA7E5" />
-          <MiniMetric title="排便"   status="正常" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.stool }))}    color="#F5A524" />
-          <MiniMetric title="排尿"   status="正常" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.urine }))}    color="#9B7AE6" />
-          <MiniMetric title="活跃度" status="良好" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.energy }))}   color="#F25F4D" />
-          <MiniMetric title="睡眠"   status="充足" severity="ok"   data={series.map((d) => ({ x: d.date, y: d.sleep }))}    color="#F7B654" />
+        <div className="grid grid-cols-2 gap-2.5">
+          <MiniMetric title="食欲"   status="正常" severity="ok" value={series[series.length-1].appetite} data={series.map((d) => ({ x: d.date, y: d.appetite }))} color="#F4A12C" />
+          <MiniMetric title="饮水"   status="正常" severity="ok" value={series[series.length-1].water}    data={series.map((d) => ({ x: d.date, y: d.water }))}    color="#3FA7E5" />
+          <MiniMetric title="排便"   status="正常" severity="ok" value={series[series.length-1].stool}    data={series.map((d) => ({ x: d.date, y: d.stool }))}    color="#F5A524" />
+          <MiniMetric title="排尿"   status="正常" severity="ok" value={series[series.length-1].urine}    data={series.map((d) => ({ x: d.date, y: d.urine }))}    color="#9B7AE6" />
+          <MiniMetric title="活跃度" status="良好" severity="ok" value={series[series.length-1].energy}   data={series.map((d) => ({ x: d.date, y: d.energy }))}   color="#F25F4D" />
+          <MiniMetric title="睡眠"   status="充足" severity="ok" value={series[series.length-1].sleep}    data={series.map((d) => ({ x: d.date, y: d.sleep }))}    color="#7CC25A" />
         </div>
       </div>
-      <div className="h-2" />
     </div>
   )
 }
 
 function MiniMetric({
-  title, status, severity, data, color,
-}: { title: string; status: string; severity: 'ok' | 'warn' | 'alert'; data: { x: string; y: number }[]; color: string }) {
-  const head = data[data.length - 1]?.y ?? 85
+  title, status, severity, value, data, color,
+}: { title: string; status: string; severity: 'ok' | 'warn' | 'alert'; value: number; data: { x: string; y: number }[]; color: string }) {
   return (
-    <div className="rounded-3xl bg-white shadow-card px-3 py-3">
+    <div className="rounded-2xl bg-white shadow-card px-3 py-3">
       <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold">{title}</div>
+        <div className="text-xs font-semibold">{title}</div>
         <div className={`pill ${severity === 'ok' ? 'status-ok' : severity === 'warn' ? 'status-warn' : 'status-alert'}`}>{status}</div>
       </div>
-      <div className="mt-1 flex items-baseline gap-1.5">
-        <span className="text-2xl font-bold text-ink-900">{head}</span>
-        <span className="text-xs text-ink-400">分</span>
+      <div className="mt-1 flex items-baseline gap-1">
+        <span className="text-xl font-bold text-ink-900">{value}</span>
+        <span className="text-[10px] text-ink-400">分</span>
       </div>
-      <div className="-ml-2 h-14 mt-1">
+      <div className="-ml-2 h-12 mt-1">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <Line type="monotone" dataKey="y" stroke={color} strokeWidth={2} dot={false} />

@@ -164,10 +164,10 @@ function Bubble({ role, content }: { role: 'user' | 'doctor'; content: string })
   if (role === 'user') {
     return (
       <div className="flex items-end justify-end gap-2">
-        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-brand-500 px-3.5 py-2.5 text-sm text-white shadow-card">
+        <div className="max-w-[75%] rounded-2xl rounded-br-md bg-brand-500 px-3.5 py-2.5 text-sm text-white shadow-card leading-relaxed">
           {content}
         </div>
-        <div className="h-8 w-8 rounded-full bg-cream-200 grid place-items-center text-xs">
+        <div className="h-8 w-8 rounded-full bg-cream-200 grid place-items-center text-[10px] text-ink-700 font-semibold shrink-0">
           我
         </div>
       </div>
@@ -175,7 +175,7 @@ function Bubble({ role, content }: { role: 'user' | 'doctor'; content: string })
   }
   return (
     <div className="flex items-end gap-2">
-      <div className="h-8 w-8 rounded-full bg-brand-100 grid place-items-center overflow-hidden shadow-card">
+      <div className="h-8 w-8 rounded-full bg-brand-100 grid place-items-center overflow-hidden shadow-card shrink-0">
         <BlackCat size={32} />
       </div>
       <div className="max-w-[78%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm text-ink-700 shadow-card whitespace-pre-wrap leading-relaxed">

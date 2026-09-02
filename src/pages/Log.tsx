@@ -5,52 +5,50 @@ import { useLogStore } from '@/store/logStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useUIStore } from '@/store/uiStore'
 
-const TABS = ['全部', '精神行为', '饮食饮水', '排泄情况', '身体状况', '其他异常'] as const
-type Tab = (typeof TABS)[number]
-
+/**
+ * 每日日志 - 严格对齐原型图：
+ * - 左返回 / 中标题 / 右日历图标
+ * - 5 月周历（18-24）
+ * - 今日记录概览（橙色进度条 + 去补全）
+ * - 5 个状态项卡片（圆形彩色图标 + 标题 + 描述 + 状态 pill）
+ * - 底部大橙色 "记录今日状态" 按钮
+ */
 export default function LogPage() {
   const nav = useNavigate()
   const currentId = usePetStore((s) => s.currentId)
   const logs = useLogStore((s) => s.byPet[currentId] ?? {})
   const pet = useCurrentPet()
   const { openSheet } = useUIStore()
-  const [tab, setTab] = useState<Tab>('全部')
-  const [view, setView] = useState<'list' | 'calendar'>('list')
-  const today = dayjs()
-  const [selectedDate, setSelectedDate] = useState(today.format('YYYY-MM-DD'))
+  const [selectedDate, setSelectedDate] = useState(dayjs('2024-05-22').format('YYYY-MM-DD'))
 
-  // 当前显示 5 月 18-24 的原型图日历
   const days = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => dayjs('2024-05-18').add(i, 'day')),
     [],
   )
 
-  const cur = logs[selectedDate] ?? logs[today.format('YYYY-MM-DD')] ?? null
+  const today = dayjs().format('YYYY-MM-DD')
+  const cur = logs[selectedDate] ?? logs[today] ?? null
 
-  const itemsCount = 8
+  const itemsCount = 5
   const completed = cur ? itemsCount : 0
-  const total = itemsCount
 
-  const items: Array<{ icon: React.ReactNode; title: string; sub: string; tag: string; color: string; sheet?: any; severity: 'ok' | 'warn' | 'alert' }> = cur ? [
-    { icon: <CatIcon />, title: '精神与行为', sub: cur.energy.description, tag: severityTextT(cur.energy.severity), color: sevColor(cur.energy.severity), sheet: 'energy', severity: cur.energy.severity },
-    { icon: <FoodIcon />, title: '食欲 & 饮水', sub: cur.appetite.description, tag: severityTextT(cur.water.severity), color: sevColor(cur.water.severity), sheet: 'appetite', severity: cur.water.severity },
-    { icon: <PooIcon />, title: '排泄情况', sub: `${cur.stool.description}，${cur.urine.description}`, tag: severityTextT(cur.stool.severity), color: sevColor(cur.stool.severity), sheet: 'stool', severity: cur.stool.severity },
-    { icon: <EyeIcon />, title: '五官 & 皮肤', sub: cur.coat.description, tag: severityTextT(cur.coat.severity), color: sevColor(cur.coat.severity), sheet: 'eyes', severity: cur.coat.severity },
-    { icon: <WarnIcon />, title: '呕吐 & 其他', sub: cur.vomit.description, tag: '无异常', color: 'ok', sheet: 'vomit', severity: cur.vomit.severity },
-    { icon: <TempIcon />, title: '体温情况', sub: cur.temperature.description, tag: '已记录', color: 'ok', sheet: 'temperature', severity: cur.temperature.severity },
-    { icon: <BowlIcon />, title: '饮食喂养记录', sub: cur.feedingNote || '未填写', tag: cur.feedingNote ? '已记录' : '待补充', color: cur.feedingNote ? 'ok' : 'warn', sheet: 'feeding', severity: cur.feedingNote ? 'ok' : 'warn' },
-    { icon: <DocIcon />, title: '总结判断', sub: cur.summary.description, tag: '已完成', color: 'ok', sheet: 'summary', severity: cur.summary.severity },
-  ] : []
-
-  const filtered = items.filter((i) => {
-    if (tab === '全部') return true
-    if (tab === '精神行为') return i.sheet === 'energy'
-    if (tab === '饮食饮水') return ['appetite', 'feeding'].includes(i.sheet)
-    if (tab === '排泄情况') return i.sheet === 'stool'
-    if (tab === '身体状况') return ['eyes', 'temperature'].includes(i.sheet)
-    if (tab === '其他异常') return ['vomit', 'summary'].includes(i.sheet)
-    return true
-  })
+  const items: {
+    icon: React.ReactNode
+    iconBg: string
+    title: string
+    sub: string
+    tag: string
+    severity: 'ok' | 'warn' | 'alert'
+    sheet: 'energy' | 'appetite' | 'stool' | 'eyes' | 'vomit'
+  }[] = cur
+    ? [
+        { icon: <CatIcon />,   iconBg: 'bg-brand-50',  title: '精神与行为', sub: cur.energy.description,   tag: severityText(cur.energy.severity),   severity: cur.energy.severity,   sheet: 'energy' },
+        { icon: <FoodIcon />,  iconBg: 'bg-info/10',   title: '食欲 & 饮水', sub: `食欲 ${cur.appetite.description}，饮水量 ${cur.water.description}`, tag: severityText(cur.water.severity), severity: cur.water.severity, sheet: 'appetite' },
+        { icon: <PooIcon />,   iconBg: 'bg-warn/10',   title: '排泄情况',   sub: `${cur.stool.description}，${cur.urine.description}`, tag: severityText(cur.stool.severity), severity: cur.stool.severity, sheet: 'stool' },
+        { icon: <CoatIcon />,  iconBg: 'bg-rose-50',   title: '五官 & 皮肤', sub: cur.coat.description,     tag: severityText(cur.coat.severity),   severity: cur.coat.severity,   sheet: 'eyes' },
+        { icon: <WarnIcon />,  iconBg: 'bg-purple/10', title: '呕吐 & 其他', sub: cur.vomit.description,    tag: '无异常', severity: cur.vomit.severity, sheet: 'vomit' },
+      ]
+    : []
 
   return (
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
@@ -59,23 +57,27 @@ export default function LogPage() {
         <button onClick={() => nav(-1)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#3F392F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
-        <div className="text-lg font-semibold">每日日志</div>
-        <button onClick={() => setView((v) => v === 'list' ? 'calendar' : 'list')} className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">
-          {view === 'list' ? '日历视图' : '列表视图'}
+        <div className="text-base font-semibold">每日日志</div>
+        <button onClick={() => openSheet('summary', selectedDate)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="5" width="18" height="16" rx="2" stroke="#3F392F" strokeWidth="1.6" />
+            <path d="M3 9h18M8 3v4M16 3v4" stroke="#3F392F" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
         </button>
       </div>
-      <div className="mt-2 text-sm text-ink-500">记录{pet.name}的每日健康状态</div>
 
-      {/* 日历 */}
-      <div className="mt-3 rounded-3xl bg-white shadow-card px-3 py-4">
+      {/* 日历（5月 18-24） */}
+      <div className="mt-3 rounded-3xl bg-white shadow-card px-3 py-3.5">
         <div className="px-2 flex items-center justify-between">
-          <button className="h-7 w-7 rounded-full bg-cream-100 grid place-items-center">‹</button>
           <div className="text-sm font-semibold">5月</div>
-          <button className="h-7 w-7 rounded-full bg-cream-100 grid place-items-center">›</button>
+          <div className="flex gap-1.5">
+            <button className="h-6 w-6 rounded-full bg-cream-100 grid place-items-center text-xs text-ink-500">‹</button>
+            <button className="h-6 w-6 rounded-full bg-cream-100 grid place-items-center text-xs text-ink-500">›</button>
+          </div>
         </div>
-        <div className="mt-3 grid grid-cols-7 gap-1 text-center">
-          {['日','一','二','三','四','五','六'].map((w) => (
-            <div key={w} className="text-[11px] text-ink-400 pb-1">{w}</div>
+        <div className="mt-2.5 grid grid-cols-7 gap-1 text-center">
+          {['日', '一', '二', '三', '四', '五', '六'].map((w) => (
+            <div key={w} className="text-[10px] text-ink-400 pb-0.5">{w}</div>
           ))}
           {days.map((d) => {
             const selected = d.format('YYYY-MM-DD') === selectedDate
@@ -83,108 +85,76 @@ export default function LogPage() {
               <button
                 key={d.toString()}
                 onClick={() => setSelectedDate(d.format('YYYY-MM-DD'))}
-                className={`h-9 rounded-xl grid place-items-center text-sm ${selected ? 'bg-brand-500 text-white font-semibold' : ''}`}
+                className={`h-9 rounded-xl grid place-items-center text-xs ${selected ? 'bg-brand-500 text-white font-semibold' : 'text-ink-700'}`}
               >
-                <div>{d.date()}</div>
+                {d.date()}
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* 今日记录概览 */}
-      <div className="mt-4 rounded-3xl bg-white shadow-card px-5 py-4">
+      {/* 今日记录概览（橙色进度条 + 去补全） */}
+      <div className="mt-3 rounded-3xl bg-white shadow-card px-4 py-3.5">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-warn text-base">★</span>
+              <span className="text-warn text-sm">★</span>
               <div className="text-sm font-semibold">今日记录概览</div>
             </div>
-            <div className="text-xs text-ink-400 mt-1">已记录 {completed}/{total} 项</div>
+            <div className="text-[11px] text-ink-400 mt-0.5">已记录 {completed}/{itemsCount} 项</div>
           </div>
           <button
             onClick={() => openSheet('summary', selectedDate)}
             className="rounded-2xl bg-cream-100 px-3 py-1.5 text-xs text-ink-700"
           >
-            去补充记录
+            去补全
           </button>
         </div>
-        <div className="mt-2 h-2 rounded-full bg-cream-100 overflow-hidden">
-          <div className="h-full bg-brand-500" style={{ width: `${(completed / total) * 100}%` }} />
+        <div className="mt-2.5 h-1.5 rounded-full bg-cream-100 overflow-hidden">
+          <div className="h-full bg-brand-500" style={{ width: `${(completed / itemsCount) * 100}%` }} />
         </div>
       </div>
 
-      {/* Tab 切换 */}
-      <div className="mt-4 flex gap-2 overflow-x-auto scrollbar-hide">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`shrink-0 px-3 py-1.5 text-xs rounded-full ${tab === t ? 'bg-ink-900 text-white' : 'bg-white text-ink-700'}`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* 列表 */}
+      {/* 状态项列表 */}
       <div className="mt-3 space-y-2.5">
-        {filtered.map((i) => (
+        {items.map((i) => (
           <button
             key={i.title}
-            onClick={() => i.sheet && openSheet(i.sheet, selectedDate)}
+            onClick={() => openSheet(i.sheet, selectedDate)}
             className="w-full rounded-2xl bg-white shadow-card px-3 py-3 flex items-center gap-3 active:scale-[0.99] transition-transform text-left"
           >
-            <div className="h-9 w-9 rounded-2xl bg-cream-100 grid place-items-center">{i.icon}</div>
+            <div className={`h-10 w-10 rounded-full ${i.iconBg} grid place-items-center shrink-0`}>{i.icon}</div>
             <div className="flex-1 min-w-0 leading-tight">
               <div className="text-sm font-semibold">{i.title}</div>
-              <div className="text-xs text-ink-400 truncate mt-0.5">{i.sub}</div>
+              <div className="text-[11px] text-ink-400 truncate mt-0.5">{i.sub}</div>
             </div>
-            <div className={`text-xs ${colorText(i.severity)}`}>{i.tag}</div>
-            <div className="text-ink-300">›</div>
+            <div className={`pill ${i.severity === 'ok' ? 'status-ok' : i.severity === 'warn' ? 'status-warn' : 'status-alert'} shrink-0`}>{i.tag}</div>
           </button>
         ))}
       </div>
 
-      {/* 大 CTA */}
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        <button
-          onClick={() => openSheet('summary', selectedDate)}
-          className="col-span-2 rounded-2xl bg-brand-500 py-3 text-white font-medium shadow-card flex items-center justify-center gap-1 active:scale-[0.98]"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2.4" strokeLinecap="round"/></svg>
-          记录今日状态
-        </button>
-        <button
-          onClick={() => openSheet('energy', selectedDate)}
-          className="rounded-2xl bg-white shadow-card py-3 text-sm font-medium text-ink-700 inline-flex items-center justify-center gap-1 active:scale-[0.98]"
-        >
-          <span className="text-warn">📷</span> 快速记录
-        </button>
-      </div>
+      {/* 底部大橙色 CTA */}
+      <button
+        onClick={() => openSheet('summary', selectedDate)}
+        className="mt-4 w-full rounded-2xl bg-brand-500 py-3.5 text-white text-sm font-medium shadow-card flex items-center justify-center gap-1.5 active:scale-[0.98]"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2.4" strokeLinecap="round"/></svg>
+        记录今日状态
+      </button>
 
-      {/* 完成度提示 */}
-      <div className="mt-3 text-center text-xs text-ink-400">{completed}/{total} 完成</div>
+      <div className="mt-2 text-center text-[11px] text-ink-400">{completed}/{itemsCount} 完成 · {pet.name}</div>
     </div>
   )
 }
 
-function severityTextT(s: 'ok' | 'warn' | 'alert') {
+function severityText(s: 'ok' | 'warn' | 'alert') {
   return s === 'ok' ? '正常' : s === 'warn' ? '轻微减少' : '需就医'
 }
-function sevColor(s: 'ok' | 'warn' | 'alert') {
-  return s === 'ok' ? 'ok' : s === 'warn' ? 'warn' : 'alert'
-}
-function colorText(s: 'ok' | 'warn' | 'alert') {
-  return s === 'ok' ? 'text-ok' : s === 'warn' ? 'text-warn' : 'text-alert'
-}
 
-// 图标
-function CatIcon() { return <span className="text-warn text-lg">🐱</span> }
-function FoodIcon() { return <span className="text-info text-lg">🍚</span> }
-function PooIcon() { return <span className="text-amber-700 text-lg">💩</span> }
-function EyeIcon() { return <span className="text-rose-400 text-lg">🩺</span> }
-function WarnIcon() { return <span className="text-ok text-lg">🛡️</span> }
-function TempIcon() { return <span className="text-purple text-lg">🌡️</span> }
-function BowlIcon() { return <span className="text-brand-500 text-lg">🥣</span> }
-function DocIcon() { return <span className="text-ink-500 text-lg">📝</span> }
+// ===== 图标（统一彩色填充风格） =====
+function CatIcon()  { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 9l2-4 4 3 1-1 1 1 4-3 2 4-1 6c0 2-2 4-5 4s-5-2-5-4l-1-6z" fill="#F4A12C"/><circle cx="9.5" cy="13" r="0.8" fill="#3F392F"/><circle cx="14.5" cy="13" r="0.8" fill="#3F392F"/></svg> }
+function FoodIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 16c2 2 5 2 7 0s5-2 7 0 5 2 4-2c-1-3-3-5-9-5s-8 2-9 5c-1 4 1 4 0 2z" fill="#F4A12C"/><path d="M9 7c0-1 1-2 2-2" stroke="#F4A12C" strokeWidth="1.4" strokeLinecap="round"/></svg> }
+function PooIcon()  { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 11c-2 0-3 2-3 4s1 4 3 4h6c2 0 3-2 3-4s-1-4-3-4c0-2-2-4-3-4s-3 2-3 4z" fill="#C28D53"/></svg> }
+function CoatIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 4c-3 0-6 2-6 5 0 1 1 2 1 3s-1 2-1 3c0 3 3 5 6 5s6-2 6-5c0-1-1-2-1-3s1-2 1-3c0-3-3-5-6-5z" fill="#F25F4D"/></svg> }
+function WarnIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3l9-16z" fill="#9B7AE6"/><path d="M12 10v4M12 17v0.5" stroke="white" strokeWidth="1.8" strokeLinecap="round"/></svg> }
