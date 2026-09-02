@@ -1,9 +1,10 @@
 import type { PropsWithChildren } from 'react'
 import BottomNav from './BottomNav'
+import PetSwitcher from './PetSwitcher'
 
 /**
  * 仿 iPhone 的手机壳：桌面端居中显示，手机端全屏。
- * 顶部 9:41 状态条 + 标题区；底部 Tab 栏。
+ * 顶部 9:41 状态条 + 宠物切换条 + 标题区；底部 Tab 栏。
  */
 export default function Layout({ children }: PropsWithChildren) {
   return (
@@ -18,7 +19,9 @@ export default function Layout({ children }: PropsWithChildren) {
             <span>🔋</span>
           </div>
         </div>
-        <div className="relative h-[calc(100%-44px)] flex flex-col">
+        {/* 宠物切换条（全局，随时切换查看对应宠物） */}
+        <PetSwitcher />
+        <div className="relative h-[calc(100%-92px)] flex flex-col">
           <div className="flex-1 overflow-y-auto scrollbar-hide">{children}</div>
           <BottomNav />
         </div>

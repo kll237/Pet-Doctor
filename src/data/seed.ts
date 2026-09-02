@@ -1,19 +1,43 @@
 import dayjs from 'dayjs'
 import type { AIAnalysisRecord, ChatMessage, DayLog, PetProfile } from '@/types'
 
-/** 宠物档案默认数据 - 布丁 3 岁 2 个月，橘猫 */
-export const defaultPet: PetProfile = {
-  id: 'pudding-001',
+/** 单只宠物的默认档案模板（用于"添加宠物"时初始化） */
+export function makePet(partial: Partial<PetProfile> & { id: string; name: string }): PetProfile {
+  return {
+    avatar: '🐱',
+    species: 'cat',
+    birthDate: dayjs().subtract(2, 'year').format('YYYY-MM-DD'),
+    ageLabel: '2岁0个月',
+    weight: 4,
+    gender: 'male',
+    neutered: false,
+    env: {
+      household: 'single',
+      litterBrand: '豆腐猫砂',
+      temperature: 24,
+      recentWetFood: '鸡肉猫条',
+    },
+    health: {
+      vaccineDate: dayjs().format('YYYY-MM-DD'),
+      rabiesDate: dayjs().format('YYYY-MM-DD'),
+      dewormDate: dayjs().format('YYYY-MM-DD'),
+    },
+    ...partial,
+  }
+}
+
+/** 默认宠物档案：布丁（橘猫，弟弟，已绝育） */
+const pudding = makePet({
+  id: 'pudding',
   name: '布丁',
   avatar: '🧡',
-  species: 'cat',
   birthDate: '2021-03-16',
   ageLabel: '3岁2个月',
   weight: 4.2,
   gender: 'male',
   neutered: true,
   env: {
-    household: 'single',
+    household: 'multi',
     litterBrand: '豆腐猫砂',
     temperature: 24,
     lastFoodChangeDate: '2024-05-01',
@@ -25,7 +49,35 @@ export const defaultPet: PetProfile = {
     rabiesDate: '2023-12-20',
     dewormDate: '2024-05-10',
   },
-}
+})
+
+/** 第二只宠物：奶茶（灰猫，妹妹，已绝育）——用于演示多宠物切换 */
+const naicha = makePet({
+  id: 'naicha',
+  name: '奶茶',
+  avatar: '🩶',
+  birthDate: '2023-07-01',
+  ageLabel: '1岁2个月',
+  weight: 3.1,
+  gender: 'female',
+  neutered: true,
+  env: {
+    household: 'multi',
+    litterBrand: '膨润土猫砂',
+    temperature: 24,
+    lastFoodChangeDate: '2024-05-10',
+    lastLitterChangeDate: '2024-05-20',
+    recentWetFood: '牛肉猫条',
+  },
+  health: {
+    vaccineDate: '2024-01-15',
+    rabiesDate: '2024-01-15',
+    dewormDate: '2024-05-12',
+  },
+})
+
+/** 种子宠物列表（多宠物家庭） */
+export const seedPets: PetProfile[] = [pudding, naicha]
 
 /**
  * 生成默认的"今日日志" — 完全还原原型图中的状态分布
@@ -86,44 +138,50 @@ export function buildWeekSeries(baseScore: number): DayLog[] {
   })
 }
 
-export const seedAnalyses: AIAnalysisRecord[] = [
-  {
-    id: 'a1',
-    date: dayjs().subtract(2, 'day').format('YYYY-MM-DD 14:30'),
-    thumb: '🐱',
-    parts: ['眼睛', '耳朵'],
-    result: '眼部泪痕偏多，建议每日擦拭',
-    severity: 'warn',
-  },
-  {
-    id: 'a2',
-    date: dayjs().subtract(4, 'day').format('YYYY-MM-DD 10:20'),
-    thumb: '😺',
-    parts: ['皮毛毛发'],
-    result: '毛发顺滑，无打结掉毛',
-    severity: 'ok',
-  },
-  {
-    id: 'a3',
-    date: dayjs().subtract(6, 'day').format('YYYY-MM-DD 16:40'),
-    thumb: '😻',
-    parts: ['整体状态'],
-    result: '耳朵干净，状态良好',
-    severity: 'ok',
-  },
-]
+/** 每只宠物的 AI 分析记录（按宠物名生成，便于区分） */
+export function makeSeedAnalyses(petName: string): AIAnalysisRecord[] {
+  return [
+    {
+      id: `a1-${petName}`,
+      date: dayjs().subtract(2, 'day').format('YYYY-MM-DD 14:30'),
+      thumb: '🐱',
+      parts: ['眼睛', '耳朵'],
+      result: `${petName}眼部泪痕偏多，建议每日擦拭`,
+      severity: 'warn',
+    },
+    {
+      id: `a2-${petName}`,
+      date: dayjs().subtract(4, 'day').format('YYYY-MM-DD 10:20'),
+      thumb: '😺',
+      parts: ['皮毛毛发'],
+      result: `${petName}毛发顺滑，无打结掉毛`,
+      severity: 'ok',
+    },
+    {
+      id: `a3-${petName}`,
+      date: dayjs().subtract(6, 'day').format('YYYY-MM-DD 16:40'),
+      thumb: '😻',
+      parts: ['整体状态'],
+      result: `${petName}耳朵干净，状态良好`,
+      severity: 'ok',
+    },
+  ]
+}
 
-export const seedChat: ChatMessage[] = [
-  {
-    id: 'm1',
-    role: 'doctor',
-    content: '你好，我是你的宠物 AI 医生"黑米"，可以问我关于布丁的任何健康问题。',
-    createdAt: Date.now() - 60_000 * 30,
-  },
-  {
-    id: 'm2',
-    role: 'doctor',
-    content: '根据你最近 7 天的记录，我注意到布丁饮水量偏低（平均 110ml/天），建议增加流动饮水机。',
-    createdAt: Date.now() - 60_000 * 15,
-  },
-]
+/** 每只宠物的问诊开场白（按宠物名个性化） */
+export function makeSeedChat(petName: string): ChatMessage[] {
+  return [
+    {
+      id: `m1-${petName}`,
+      role: 'doctor',
+      content: `你好，我是你的宠物 AI 医生"黑米"，可以问我关于 ${petName} 的任何健康问题。`,
+      createdAt: Date.now() - 60_000 * 30,
+    },
+    {
+      id: `m2-${petName}`,
+      role: 'doctor',
+      content: `根据你最近 7 天的记录，我注意到 ${petName} 饮水量偏低（平均 110ml/天），建议增加流动饮水机。`,
+      createdAt: Date.now() - 60_000 * 15,
+    },
+  ]
+}

@@ -2,11 +2,14 @@ import { useRef } from 'react'
 import dayjs from 'dayjs'
 import { useAnalysisStore } from '@/store/analysisStore'
 import { useUIStore } from '@/store/uiStore'
+import { usePetStore } from '@/store/petStore'
 
 const PARTS = ['眼睛', '耳朵', '鼻子', '口腔', '皮肤毛发', '整体状态']
 
 export default function AIAnalysisPage() {
-  const { records, add } = useAnalysisStore()
+  const currentId = usePetStore((s) => s.currentId)
+  const records = useAnalysisStore((s) => s.byPet[currentId] ?? [])
+  const { add } = useAnalysisStore()
   const { openSheet } = useUIStore()
   const fileRef = useRef<HTMLInputElement>(null)
 

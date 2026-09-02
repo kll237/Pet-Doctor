@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { usePetStore } from '@/store/petStore'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useLogStore } from '@/store/logStore'
-import { severityText } from '@/lib/utils'
 
 /**
  * 首页 - 完全还原原型图：
@@ -15,9 +14,10 @@ import { severityText } from '@/lib/utils'
  */
 export default function HomePage() {
   const nav = useNavigate()
-  const pet = usePetStore((s) => s.pet)
+  const pet = useCurrentPet()
+  const currentId = usePetStore((s) => s.currentId)
   const today = dayjs().format('YYYY-MM-DD')
-  const log = useLogStore((s) => s.logs[today])
+  const log = useLogStore((s) => (s.byPet[currentId] ?? {})[today])
   const todayLog = log ?? null
 
   const metrics: { key: string; label: string; icon: React.ReactNode; value: string; severity: 'ok' | 'warn' | 'alert' }[] = todayLog
@@ -45,7 +45,7 @@ export default function HomePage() {
           <div className="leading-tight">
             <div className="flex items-center gap-1">
               <span className="text-lg font-semibold">{pet.name}</span>
-              <span className="text-brand-500 text-lg">♀</span>
+              <span className="text-brand-500 text-lg">{pet.gender === 'male' ? '♂' : '♀'}</span>
             </div>
             <div className="text-xs text-ink-500">
               {pet.ageLabel} <span className="mx-1 text-ink-300">·</span> {pet.weight}kg <span className="mx-1 text-ink-300">·</span> {pet.neutered ? '已绝育' : '未绝育'}

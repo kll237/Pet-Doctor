@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useChatStore } from '@/store/chatStore'
 import { useUIStore } from '@/store/uiStore'
-import { SUGGESTIONS } from '@/lib/aiDoctor'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
+import { suggestionsFor } from '@/lib/aiDoctor'
 import BlackCat from './BlackCat'
 
 /**
@@ -13,7 +14,10 @@ import BlackCat from './BlackCat'
  */
 export default function BlackCatDoctor() {
   const { doctorOpen, setDoctorOpen, toggleDoctor } = useUIStore()
-  const { messages, sending, send } = useChatStore()
+  const currentId = usePetStore((s) => s.currentId)
+  const pet = useCurrentPet()
+  const messages = useChatStore((s) => s.byPet[currentId] ?? [])
+  const { sending, send } = useChatStore()
   const [input, setInput] = useState('')
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -118,7 +122,7 @@ export default function BlackCatDoctor() {
 
             {/* 推荐问题 */}
             <div className="px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
-              {SUGGESTIONS.map((s) => (
+              {suggestionsFor(pet.name).map((s) => (
                 <button
                   key={s}
                   onClick={() => send(s)}

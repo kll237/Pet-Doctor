@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useUIStore } from '@/store/uiStore'
 import { useLogStore } from '@/store/logStore'
+import { usePetStore } from '@/store/petStore'
 import dayjs from 'dayjs'
 import { MetricStatus } from '@/types'
 import { useState, useEffect } from 'react'
@@ -154,7 +155,7 @@ function ChipsGroup({ options, value, onChange, multi }: { options: string[]; va
 
 // --- 各表单实现：直接把日志字段更新到 store ---
 function EnergyForm({ date, onClose }: { date: string; onClose: () => void; openSheet: any }) {
-  const log = useLogStore((s) => s.logs[date] ?? null)
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date] ?? null)
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -193,7 +194,7 @@ function EnergyForm({ date, onClose }: { date: string; onClose: () => void; open
 }
 
 function AppetiteForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -236,7 +237,7 @@ function AppetiteForm({ date, onClose }: { date: string; onClose: () => void }) 
 }
 
 function StoolForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -273,7 +274,7 @@ function StoolForm({ date, onClose }: { date: string; onClose: () => void }) {
 }
 
 function EyesForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -309,7 +310,7 @@ function EyesForm({ date, onClose }: { date: string; onClose: () => void }) {
 }
 
 function VomitForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -328,7 +329,7 @@ function VomitForm({ date, onClose }: { date: string; onClose: () => void }) {
 }
 
 function TemperatureForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const update = useLogStore((s) => s.updateMetric)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -356,7 +357,7 @@ function TemperatureForm({ date, onClose }: { date: string; onClose: () => void 
 }
 
 function FeedingForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   const updateNote = useLogStore((s) => s.updateFeedingNote)
   const mark = useLogStore((s) => s.markRecorded)
   if (!log) return null
@@ -383,7 +384,7 @@ function FeedingForm({ date, onClose }: { date: string; onClose: () => void }) {
 }
 
 function SummaryForm({ date, onClose }: { date: string; onClose: () => void }) {
-  const log = useLogStore((s) => s.logs[date])
+  const log = useLogStore((s) => (s.byPet[usePetStore.getState().currentId] ?? {})[date])
   if (!log) return null
   return (
     <div>

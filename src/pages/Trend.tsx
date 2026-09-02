@@ -5,6 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart,
 } from 'recharts'
 import { useLogStore } from '@/store/logStore'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
 
 const SPANS = [
   { key: 7, label: '7天' },
@@ -14,8 +15,10 @@ const SPANS = [
 
 export default function TrendPage() {
   const nav = useNavigate()
+  const currentId = usePetStore((s) => s.currentId)
+  const pet = useCurrentPet()
   const [span, setSpan] = useState<7 | 30 | 90>(30)
-  const logs = useLogStore((s) => s.logs)
+  const logs = useLogStore((s) => s.byPet[currentId] ?? {})
   const today = dayjs().format('YYYY-MM-DD')
 
   // 生成模拟数据
@@ -50,7 +53,7 @@ export default function TrendPage() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#3F392F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
         <div className="text-lg font-semibold">健康趋势</div>
-        <button className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">布丁 ▾</button>
+        <button className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">{pet.name} ▾</button>
       </div>
 
       {/* 时间筛选 */}

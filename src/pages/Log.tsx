@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useLogStore } from '@/store/logStore'
-import { usePetStore } from '@/store/petStore'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useUIStore } from '@/store/uiStore'
 
 const TABS = ['全部', '精神行为', '饮食饮水', '排泄情况', '身体状况', '其他异常'] as const
@@ -10,8 +10,9 @@ type Tab = (typeof TABS)[number]
 
 export default function LogPage() {
   const nav = useNavigate()
-  const { logs } = useLogStore()
-  const pet = usePetStore((s) => s.pet)
+  const currentId = usePetStore((s) => s.currentId)
+  const logs = useLogStore((s) => s.byPet[currentId] ?? {})
+  const pet = useCurrentPet()
   const { openSheet } = useUIStore()
   const [tab, setTab] = useState<Tab>('全部')
   const [view, setView] = useState<'list' | 'calendar'>('list')

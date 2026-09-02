@@ -37,7 +37,7 @@
 | 框架     | React 18 + TypeScript 5                          |
 | 构建     | Vite 5                                            |
 | 样式     | TailwindCSS 3（移动端 H5 自适应）                 |
-| 路由     | React Router 6（HashRouter，兼容静态托管）         |
+| 路由     | React Router 6（BrowserRouter，支持直接 URL 路由）  |
 | 状态     | Zustand 4（持久化到 localStorage）                |
 | 图表     | Recharts 2（折线图 + 面积图）                     |
 | 动效     | Framer Motion 11（悬浮 / 浮层 / 气泡动画）        |
@@ -122,9 +122,17 @@ send: async (text) => {
 
 ## 📱 预览
 
-| 首页                              | 日志                              | AI 分析                          |
-| --------------------------------- | --------------------------------- | -------------------------------- |
-| ![Home](https://placeholder/img)  | ![Log](https://placeholder/img)   | ![AI](https://placeholder/img)   |
+> 6 个核心页面（首页 / 日志 / AI 分析 / 趋势 / 我的 / 每日报告）均已在本地用 Chrome headless 渲染验证通过。
+> 验证截图保存在本地 `screenshots/` 目录，可直接 `npm run dev` 启动后对照查看。
+
+| 页面       | 说明                                   |
+| ---------- | -------------------------------------- |
+| 首页       | 宠物卡片 + 今日健康评分 + AI 拍照入口   |
+| 日志       | 8 大维度录入 + 时间轴                   |
+| AI 分析    | 拍照/上传 + 6 部位识别                  |
+| 趋势       | 7/30/90 天评分曲线 + 迷你折线           |
+| 我的       | 宠物档案 + 免疫/驱虫时间轴              |
+| 每日报告   | 0-100 综合评分 + 三级状态判定           |
 
 ## 📄 License
 

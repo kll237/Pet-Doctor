@@ -1,21 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import dayjs from 'dayjs'
-import type { DayLog, MetricStatus } from '@/types'
+import type { DayLog, MetricStatus, Severity } from '@/types'
 import { buildWeekSeries, defaultTodayLog } from '@/data/seed'
+import { seedPets } from '@/data/seed'
+import { usePetStore } from '@/store/petStore'
 
 interface LogState {
-  /** 以 date 为 key 的日志表 */
-  logs: Record<string, DayLog>
-  /** 计算综合分 */
+  /** 以 petId → date → 日志 的二级结构隔离多宠物数据 */
+  byPet: Record<string, Record<string, DayLog>>
   recomputeOverall: (date: string) => void
-  /** 更新某维度的状态 */
   updateMetric: (date: string, m: MetricStatus) => void
-  /** 更新自由文本 */
   updateFeedingNote: (date: string, note: string) => void
-  /** 把今日标记为已完成 */
   markRecorded: (date: string) => void
-  /** 取某天的日志（如果不存在则克隆默认今日日志） */
   getLog: (date: string) => DayLog
 }
 
@@ -44,73 +41,105 @@ function computeOverall(log: DayLog): number {
   return Math.round(acc / totalW)
 }
 
+function severityLabel(score: number): string {
+  if (score >= 88) return '健康'
+  if (score >= 70) return '轻微异常居家观察'
+  return '需尽快就医'
+}
+
+function severityOf(score: number): Severity {
+  if (score >= 88) return 'ok'
+  if (score >= 70) return 'warn'
+  return 'alert'
+}
+
+/** 为单只宠物构建默认日志（近 7 天 + 今天） */
+function buildPetLogs(): Record<string, DayLog> {
+  const today = dayjs().format('YYYY-MM-DD')
+  const initial: Record<string, DayLog> = {}
+  buildWeekSeries(86).forEach((l) => { initial[l.date] = l })
+  initial[today] = { ...defaultTodayLog, date: today }
+  return initial
+}
+
 export const useLogStore = create<LogState>()(
   persist(
     (set, get) => {
-      const today = dayjs().format('YYYY-MM-DD')
-      const initial: Record<string, DayLog> = {}
-      // 初始化近 7 天
-      buildWeekSeries(86).forEach((l) => { initial[l.date] = l })
-      initial[today] = { ...defaultTodayLog, date: today }
+      // 初始化：为每只种子宠物生成日志
+      const byPet: Record<string, Record<string, DayLog>> = {}
+      seedPets.forEach((p) => { byPet[p.id] = buildPetLogs() })
+
+      /** 取当前宠物 id（实时读取，确保切换后写入正确宠物） */
+      const pid = () => usePetStore.getState().currentId
+
+      /** 确保某宠物的日志表存在，返回新的 byPet（不可变更新） */
+      const ensure = (all: Record<string, Record<string, DayLog>>, id: string) => {
+        if (all[id]) return all
+        return { ...all, [id]: buildPetLogs() }
+      }
 
       return {
-        logs: initial,
+        byPet,
 
         recomputeOverall: (date) => {
-          const log = get().logs[date]
+          const id = pid()
+          const all = ensure(get().byPet, id)
+          const petLogs = { ...(all[id] ?? {}) }
+          const log = petLogs[date]
           if (!log) return
           const score = computeOverall(log)
-          const severity = score >= 88 ? 'ok' : score >= 70 ? 'warn' : 'alert'
-          set((s) => ({
-            logs: {
-              ...s.logs,
-              [date]: {
-                ...log,
-                overallScore: score,
-                summary: { ...log.summary, score, severity, label: severity === 'ok' ? '健康' : severity === 'warn' ? '轻微异常' : '需就医' },
-              },
-            },
-          }))
+          petLogs[date] = {
+            ...log,
+            overallScore: score,
+            summary: { ...log.summary, score, severity: severityOf(score), label: severityLabel(score), description: log.summary.description },
+          }
+          set({ byPet: { ...all, [id]: petLogs } })
         },
 
         updateMetric: (date, m) => {
-          const log = get().logs[date] ?? cloneDefaultLog(date)
+          const id = pid()
+          const all = ensure(get().byPet, id)
+          const petLogs = { ...(all[id] ?? {}) }
+          const log = petLogs[date] ?? cloneDefaultLog(date)
           const updated = { ...log, [m.key]: m } as DayLog
           const score = computeOverall(updated)
           updated.overallScore = score
           updated.summary = {
             ...updated.summary,
             score,
-            severity: score >= 88 ? 'ok' : score >= 70 ? 'warn' : 'alert',
+            severity: severityOf(score),
             label: severityLabel(score),
             description: severityLabel(score),
           }
-          set((s) => ({ logs: { ...s.logs, [date]: updated } }))
+          petLogs[date] = updated
+          set({ byPet: { ...all, [id]: petLogs } })
         },
 
         updateFeedingNote: (date, note) => {
-          const log = get().logs[date] ?? cloneDefaultLog(date)
-          set((s) => ({ logs: { ...s.logs, [date]: { ...log, feedingNote: note } } }))
+          const id = pid()
+          const all = ensure(get().byPet, id)
+          const petLogs = { ...(all[id] ?? {}) }
+          const log = petLogs[date] ?? cloneDefaultLog(date)
+          petLogs[date] = { ...log, feedingNote: note }
+          set({ byPet: { ...all, [id]: petLogs } })
         },
 
         markRecorded: (date) => {
-          const log = get().logs[date] ?? cloneDefaultLog(date)
-          set((s) => ({ logs: { ...s.logs, [date]: { ...log, recorded: true } } }))
+          const id = pid()
+          const all = ensure(get().byPet, id)
+          const petLogs = { ...(all[id] ?? {}) }
+          const log = petLogs[date] ?? cloneDefaultLog(date)
+          petLogs[date] = { ...log, recorded: true }
+          set({ byPet: { ...all, [id]: petLogs } })
         },
 
         getLog: (date) => {
-          const existing = get().logs[date]
-          if (existing) return existing
-          return cloneDefaultLog(date)
+          const id = pid()
+          const petLogs = get().byPet[id] ?? {}
+          return petLogs[date] ?? cloneDefaultLog(date)
         },
       }
     },
-    { name: 'petcare-logs' },
+    { name: 'petcare-logs-v2' },
   ),
 )
-
-function severityLabel(score: number) {
-  if (score >= 88) return '健康'
-  if (score >= 70) return '轻微异常居家观察'
-  return '需尽快就医'
-}

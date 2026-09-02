@@ -1,16 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { usePetStore } from '@/store/petStore'
 import { useState } from 'react'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
+import { AddPetModal } from '@/components/PetSwitcher'
 
 /**
  * 宠物档案 - 完全还原原型图中的卡片分区
- * 1. 基础信息  2. 饲养环境  3. 免疫 & 驱虫
+ * 1. 基础信息（名字可改、性别/绝育可选） 2. 我的宠物（切换/删除/添加） 3. 饲养环境 4. 免疫 & 驱虫
  */
 export default function ProfilePage() {
   const nav = useNavigate()
-  const { pet, setPet, setEnv, setHealth } = usePetStore()
+  const pet = useCurrentPet()
+  const pets = usePetStore((s) => s.pets)
+  const currentId = usePetStore((s) => s.currentId)
+  const setCurrentId = usePetStore((s) => s.setCurrentId)
+  const removePet = usePetStore((s) => s.removePet)
+  const updatePet = usePetStore((s) => s.updatePet)
+  const setEnv = usePetStore((s) => s.setEnv)
+  const setHealth = usePetStore((s) => s.setHealth)
   const [edit, setEdit] = useState(false)
+  const [adding, setAdding] = useState(false)
 
   return (
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
@@ -24,22 +33,83 @@ export default function ProfilePage() {
         </button>
       </div>
 
-      {/* 头像 + 名字 */}
+      {/* 头像 + 名字（名字可编辑） */}
       <div className="mt-3 rounded-3xl bg-white shadow-card px-5 py-4 flex items-center gap-3">
         <div className="h-16 w-16 rounded-2xl bg-cream-100 grid place-items-center text-3xl shadow-card">{pet.avatar}</div>
         <div className="flex-1 leading-tight">
-          <div className="text-base font-semibold">{pet.name}</div>
-          <div className="text-xs text-ink-400 mt-0.5">{pet.ageLabel} <span className="mx-1 text-ink-300">·</span> {pet.weight}kg <span className="mx-1 text-ink-300">·</span> {pet.neutered ? '已绝育' : '未绝育'}</div>
+          {edit ? (
+            <input
+              defaultValue={pet.name}
+              onChange={(e) => updatePet({ name: e.target.value })}
+              className="text-base font-semibold bg-cream-50 rounded-xl px-2 py-1 outline-none w-full"
+            />
+          ) : (
+            <div className="text-base font-semibold">{pet.name}</div>
+          )}
+          <div className="text-xs text-ink-400 mt-0.5">
+            {pet.ageLabel} <span className="mx-1 text-ink-300">·</span> {pet.weight}kg <span className="mx-1 text-ink-300">·</span> {pet.gender === 'male' ? '♂ 弟弟' : '♀ 妹妹'} <span className="mx-1 text-ink-300">·</span> {pet.neutered ? '已绝育' : '未绝育'}
+          </div>
         </div>
-        <button className="rounded-2xl bg-cream-100 px-3 py-1.5 text-xs text-ink-700" onClick={() => setEdit((v) => !v)}>编辑</button>
       </div>
 
       {/* 基础信息 */}
       <Section title="基础信息">
-        <Row label="年龄" value={pet.ageLabel} edit={edit} onChange={(v) => setPet({ ageLabel: v })} />
-        <Row label="体重" value={`${pet.weight}kg`} edit={edit} onChange={(v) => setPet({ weight: +v || pet.weight })} numeric />
-        <Row label="性别" value={pet.gender === 'male' ? '♂ 弟弟' : '♀ 妹妹'} />
-        <Row label="是否绝育" value={pet.neutered ? '是' : '否'} />
+        {edit && (
+          <Row label="名字" value={pet.name} edit onChange={(v) => updatePet({ name: v })} />
+        )}
+        <Row label="年龄" value={pet.ageLabel} edit={edit} onChange={(v) => updatePet({ ageLabel: v })} />
+        <Row label="体重" value={`${pet.weight}kg`} edit={edit} onChange={(v) => updatePet({ weight: +v || pet.weight })} numeric />
+        <Row
+          label="性别"
+          value={pet.gender === 'male' ? '弟弟 ♂' : '妹妹 ♀'}
+          edit={edit}
+          options={['弟弟 ♂', '妹妹 ♀']}
+          onChange={(v) => updatePet({ gender: v.startsWith('弟弟') ? 'male' : 'female' })}
+        />
+        <Row
+          label="是否绝育"
+          value={pet.neutered ? '已绝育' : '未绝育'}
+          edit={edit}
+          options={['已绝育', '未绝育']}
+          onChange={(v) => updatePet({ neutered: v === '已绝育' })}
+        />
+      </Section>
+
+      {/* 我的宠物（切换 / 删除 / 添加） */}
+      <Section title="我的宠物">
+        {pets.map((p) => (
+          <div key={p.id} className="flex items-center justify-between px-1 py-2.5">
+            <button
+              onClick={() => setCurrentId(p.id)}
+              className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
+            >
+              <span className="h-9 w-9 rounded-full bg-cream-100 grid place-items-center text-lg shrink-0">{p.avatar}</span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-medium truncate">{p.name}</span>
+                <span className="block text-xs text-ink-400">{p.gender === 'male' ? '弟弟' : '妹妹'} · {p.neutered ? '已绝育' : '未绝育'} · {p.weight}kg</span>
+              </span>
+            </button>
+            {currentId === p.id ? (
+              <span className="text-xs text-brand-500 px-2 py-1 rounded-full bg-brand-50">当前</span>
+            ) : (
+              <button
+                onClick={() => setCurrentId(p.id)}
+                className="text-xs text-brand-500 px-2.5 py-1 rounded-full bg-brand-50"
+              >切换</button>
+            )}
+            {pets.length > 1 && (
+              <button
+                onClick={() => removePet(p.id)}
+                className="ml-2 text-xs text-alert px-2 py-1"
+                aria-label="删除宠物"
+              >删除</button>
+            )}
+          </div>
+        ))}
+        <button
+          onClick={() => setAdding(true)}
+          className="mt-1 w-full rounded-2xl bg-cream-100 py-2.5 text-sm text-brand-500 font-medium"
+        >＋ 添加宠物</button>
       </Section>
 
       {/* 饲养环境 */}
@@ -71,6 +141,13 @@ export default function ProfilePage() {
       >
         {edit ? '保存' : '编辑档案'}
       </button>
+
+      {adding && (
+        <AddPetModal
+          onClose={() => setAdding(false)}
+          onConfirm={(p) => { usePetStore.getState().addPet(p); setAdding(false) }}
+        />
+      )}
     </div>
   )
 }

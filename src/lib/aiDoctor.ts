@@ -94,18 +94,20 @@ const RULES: { keys: string[]; reply: string }[] = [
 const FALLBACK = (q: string) =>
   `收到你的问题："${q.slice(0, 60)}${q.length > 60 ? '…' : ''}"。我会结合布丁最近的日志/趋势给建议——能再多描述一下时间、频率或伴随症状吗？`
 
-export function doctorReply(input: string, _history: ChatMessage[]): string {
+export function doctorReply(input: string, _history: ChatMessage[], petName = '它'): string {
   const q = input.toLowerCase()
   for (const r of RULES) {
-    if (r.keys.some((k) => q.includes(k.toLowerCase()))) return r.reply
+    if (r.keys.some((k) => q.includes(k.toLowerCase()))) return r.reply.replace(/布丁/g, petName)
   }
-  return FALLBACK(input)
+  return FALLBACK(input).replace(/布丁/g, petName)
 }
 
-/** 启动问候 */
-export const SUGGESTIONS = [
-  '布丁最近喝水变少怎么办？',
-  '公猫尿闭有什么紧急信号？',
-  '怎么给猫做 7 日换粮过渡？',
-  '布丁眼睛有泪痕需要看医生吗？',
-]
+/** 推荐问题（按宠物名个性化） */
+export function suggestionsFor(petName: string): string[] {
+  return [
+    `${petName}最近喝水变少怎么办？`,
+    '公猫尿闭有什么紧急信号？',
+    '怎么给猫做 7 日换粮过渡？',
+    `${petName}眼睛有泪痕需要看医生吗？`,
+  ]
+}

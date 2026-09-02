@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useLogStore } from '@/store/logStore'
+import { usePetStore } from '@/store/petStore'
 
 /**
  * 今日健康总结 - 原型图右下角展示卡片化
@@ -8,8 +9,9 @@ import { useLogStore } from '@/store/logStore'
  */
 export default function DailyReportPage() {
   const nav = useNavigate()
+  const currentId = usePetStore((s) => s.currentId)
   const today = dayjs().format('YYYY-MM-DD')
-  const log = useLogStore((s) => s.logs[today])
+  const log = useLogStore((s) => (s.byPet[currentId] ?? {})[today])
   if (!log) return null
 
   return (
