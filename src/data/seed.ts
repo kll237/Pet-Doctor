@@ -174,7 +174,7 @@ export function makeSeedChat(petName: string): ChatMessage[] {
     {
       id: `m1-${petName}`,
       role: 'doctor',
-      content: `你好，我是你的宠物 AI 医生"黑米"，可以问我关于 ${petName} 的任何健康问题。`,
+      content: `你好，我是你的宠物 AI 医生"猫宁医生"，可以问我关于 ${petName} 的任何健康问题。`,
       createdAt: Date.now() - 60_000 * 30,
     },
     {

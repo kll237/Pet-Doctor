@@ -7,8 +7,8 @@ import { suggestionsFor } from '@/lib/aiDoctor'
 import BlackCat from './BlackCat'
 
 /**
- * 悬浮在右下角的黑猫医生入口：
- * - 默认是圆形悬浮按钮 + "问询黑医生"提示标签
+ * 悬浮在右下角的猫宁医生入口：
+ * - 默认是圆形悬浮按钮 + "问询猫宁医生"提示标签
  * - 点击展开全屏对话浮窗
  * - 模拟大模型回复（生产可替换为真实 LLM API）
  */
@@ -50,7 +50,7 @@ export default function BlackCatDoctor() {
               transition={{ delay: 0.4 }}
               className="rounded-2xl bg-white px-3 py-1.5 shadow-float text-xs text-ink-700 mb-1"
             >
-              问询黑医生
+              问询猫宁医生
             </motion.div>
             {/* 圆头像 */}
             <button
@@ -84,7 +84,7 @@ export default function BlackCatDoctor() {
                 返回
               </button>
               <div className="text-center">
-                <div className="text-base font-semibold">猫医生</div>
+                <div className="text-base font-semibold">猫宁医生</div>
                 <div className="text-xs text-ok flex items-center justify-center gap-1">
                   <span className="h-1.5 w-1.5 rounded-full bg-ok inline-block" />在线
                 </div>
@@ -98,7 +98,7 @@ export default function BlackCatDoctor() {
                 <BlackCat size={48} />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold">AI 宠物医生 · 黑米</div>
+                <div className="text-sm font-semibold">AI 宠物医生 · 猫宁医生</div>
                 <div className="text-xs text-ink-400">基于日志 + 模型综合分析 · 仅供参考</div>
               </div>
             </div>
