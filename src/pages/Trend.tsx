@@ -6,6 +6,8 @@ import {
 } from 'recharts'
 import { useLogStore } from '@/store/logStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 const SPANS = [
   { key: 7, label: '7天' },
@@ -15,7 +17,7 @@ const SPANS = [
 
 /**
  * 健康趋势 - 严格对齐原型图：
- * - 左返回 / 中标题 / 右 "{pet.name} ▾"
+ * - 左返回 / 中标题 / 右 "{pet.name} ▾" 带橘猫头像
  * - 7/30/90 三段 tab（橙色高亮）
  * - 健康评分趋势大卡（分数 + 涨跌 + 面积图）
  * - 各项指标趋势 2×3 小卡
@@ -59,7 +61,14 @@ export default function TrendPage() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#3F392F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
         <div className="text-base font-semibold">健康趋势</div>
-        <button className="rounded-full bg-brand-50 px-3 py-1.5 text-xs text-brand-500">{pet.name} ▾</button>
+        <button className="flex items-center gap-1.5 rounded-full bg-brand-50 px-1.5 py-1 text-xs text-brand-500">
+          <PetAvatar
+            src={pet.avatar || CATS.puddingAvatar}
+            alt={pet.name}
+            className="h-6 w-6 rounded-full overflow-hidden bg-cream-100"
+          />
+          <span className="pr-1.5">{pet.name} ▾</span>
+        </button>
       </div>
 
       {/* 时间筛选 tab */}

@@ -1,24 +1,28 @@
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useLogStore } from '@/store/logStore'
-import { usePetStore } from '@/store/petStore'
+import { usePetStore, useCurrentPet } from '@/store/petStore'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 今日健康总结 - 严格对齐原型图：
- * - 大圆综合评价（带✿ 装饰 + 86 分 + 健康 + 状态描述）
+ * - 大圆综合评价（带 ✿ 装饰 + 86 分 + 健康 + 状态描述）内嵌橘猫图
  * - 各项指标评分列表（圆点 + 名称 + 分数 + 箭头）
  * - 建议（黄色品牌色卡）
  * - 分享报告 / 保存到相册 两按钮
+ * - 右下角医生立绘（带"问问猫宁生"提示气泡，装饰用）
  */
 export default function DailyReportPage() {
   const nav = useNavigate()
   const currentId = usePetStore((s) => s.currentId)
+  const pet = useCurrentPet()
   const today = dayjs().format('YYYY-MM-DD')
   const log = useLogStore((s) => (s.byPet[currentId] ?? {})[today])
   if (!log) return null
 
   return (
-    <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
+    <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full relative">
       {/* Header */}
       <div className="flex items-center justify-between">
         <button onClick={() => nav(-1)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
@@ -32,15 +36,23 @@ export default function DailyReportPage() {
         </button>
       </div>
 
-      {/* 综合评估大卡 */}
+      {/* 综合评估大卡（含橘猫布丁坐姿图） */}
       <div className="mt-3 rounded-3xl bg-white shadow-card p-6 text-center relative overflow-hidden">
         <div className="text-sm font-semibold text-ink-700">综合评价</div>
-        <div className="mt-3 mx-auto h-36 w-36 rounded-full grid place-items-center bg-gradient-to-br from-cream-100 to-cream-50 shadow-card relative">
-          <span className="text-5xl font-bold text-brand-500 leading-none">{log.overallScore}</span>
-          <span className="absolute right-5 top-5 text-warn text-sm">分</span>
+        <div className="mt-3 mx-auto h-40 w-40 rounded-full grid place-items-center bg-gradient-to-br from-cream-100 to-cream-50 shadow-card relative">
+          {/* 圆内的橘猫图（替换原占位） */}
+          <PetAvatar
+            src={CATS.puddingSitting}
+            alt={pet.name}
+            className="absolute inset-0 h-full w-full rounded-full overflow-hidden opacity-90"
+            imgClassName="object-cover"
+          />
+          {/* 分数叠加在图上 */}
+          <span className="relative z-10 text-5xl font-bold text-ink-900 leading-none drop-shadow">{log.overallScore}</span>
+          <span className="absolute right-5 top-5 text-warn text-sm z-10 bg-white/70 rounded-full px-1.5">分</span>
           {/* 装饰花瓣 */}
-          <span className="absolute -top-1 left-3 text-warn text-2xl">✿</span>
-          <span className="absolute -bottom-1 right-3 text-warn text-2xl">✿</span>
+          <span className="absolute -top-1 left-3 text-warn text-2xl z-10">✿</span>
+          <span className="absolute -bottom-1 right-3 text-warn text-2xl z-10">✿</span>
         </div>
         <div className="mt-3 text-2xl font-bold text-brand-500">{log.summary.label}</div>
         <div className="mt-1 text-xs text-ink-700">状态良好，继续保持当日的护生活哦~</div>
@@ -87,6 +99,22 @@ export default function DailyReportPage() {
         <button className="rounded-2xl bg-brand-500 py-3 text-xs font-medium text-white shadow-card flex items-center justify-center gap-1.5 active:scale-[0.98]">
           <span>📅</span> 保存到相册
         </button>
+      </div>
+
+      {/* 右下角医生立绘（带"问问猫宁医生"气泡，装饰） */}
+      <div className="pointer-events-none absolute right-0 -bottom-2 w-28 h-28 flex items-end justify-end">
+        <div className="relative">
+          <PetAvatar
+            src={CATS.decoBottomDoctor}
+            alt="猫宁医生"
+            className="h-24 w-24 rounded-full overflow-hidden bg-cream-100"
+            imgClassName="object-cover"
+          />
+          <div className="absolute -left-16 -top-2 rounded-2xl bg-white px-2.5 py-1 shadow-card text-[11px] text-ink-700 whitespace-nowrap">
+            问问猫宁医生
+            <span className="absolute right-[-4px] top-3 h-2 w-2 bg-white rotate-45" />
+          </div>
+        </div>
       </div>
     </div>
   )

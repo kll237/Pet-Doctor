@@ -3,10 +3,13 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { AddPetModal } from '@/components/PetSwitcher'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 宠物档案 - 完全还原原型图中的卡片分区
  * 1. 基础信息（名字可改、性别/绝育可选） 2. 我的宠物（切换/删除/添加） 3. 饲养环境 4. 免疫 & 驱虫
+ * 顶部头像用真实布丁图（替换原 emoji）
  */
 export default function ProfilePage() {
   const nav = useNavigate()
@@ -38,7 +41,11 @@ export default function ProfilePage() {
 
       {/* 头像 + 名字（奶油色卡） */}
       <div className="mt-3 rounded-3xl bg-gradient-to-br from-cream-100 to-cream-50 shadow-card px-4 py-3.5 flex items-center gap-3">
-        <div className="h-14 w-14 rounded-2xl bg-white grid place-items-center text-3xl shadow-card">{pet.avatar}</div>
+        <PetAvatar
+          src={pet.avatar || CATS.puddingAvatar}
+          alt={pet.name}
+          className="h-14 w-14 rounded-2xl overflow-hidden bg-white shadow-card"
+        />
         <div className="flex-1 leading-tight min-w-0">
           {edit ? (
             <input
@@ -86,7 +93,11 @@ export default function ProfilePage() {
               onClick={() => setCurrentId(p.id)}
               className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
             >
-              <span className="h-9 w-9 rounded-full bg-cream-100 grid place-items-center text-lg shrink-0">{p.avatar}</span>
+              <PetAvatar
+                src={p.avatar || CATS.puddingAvatar}
+                alt={p.name}
+                className="h-9 w-9 rounded-full overflow-hidden bg-cream-100 shrink-0"
+              />
               <span className="flex-1 min-w-0">
                 <span className="block text-sm font-medium truncate">{p.name}</span>
                 <span className="block text-xs text-ink-400">{p.gender === 'male' ? '弟弟' : '妹妹'} · {p.neutered ? '已绝育' : '未绝育'} · {p.weight}kg</span>

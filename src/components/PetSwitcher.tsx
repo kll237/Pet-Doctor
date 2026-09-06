@@ -2,8 +2,20 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePetStore, makePet } from '@/store/petStore'
 import type { Gender, PetProfile } from '@/types'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
-const AVATARS = ['🐱', '🧡', '🩶', '🐈', '🐈‍⬛', '🐶', '🐕', '🦊']
+/** 添加宠物时可选择的头像（用同一只布丁的不同姿势 + 装饰小黑猫） */
+const AVATARS: { src: string; key: string }[] = [
+  { src: CATS.puddingAvatar,   key: 'pudding-avatar' },
+  { src: CATS.puddingSideFace,  key: 'pudding-side' },
+  { src: CATS.puddingLying,     key: 'pudding-lying' },
+  { src: CATS.puddingSitting,   key: 'pudding-sitting' },
+  { src: CATS.puddingSleeping,  key: 'pudding-sleeping' },
+  { src: CATS.decoHomeBlack,    key: 'deco-home' },
+  { src: CATS.decoHealthBlack,  key: 'deco-health' },
+  { src: CATS.decoLogBlack,     key: 'deco-log' },
+]
 
 /**
  * 全局宠物切换条：底部 Tab 之上的横向宠物头像条，
@@ -27,7 +39,12 @@ export default function PetSwitcher() {
               currentId === p.id ? 'bg-brand-500 text-white shadow-card' : 'bg-white text-ink-700'
             }`}
           >
-            <span className="h-7 w-7 rounded-full bg-cream-100 grid place-items-center text-lg">{p.avatar}</span>
+            <PetAvatar
+              src={p.avatar || CATS.puddingAvatar}
+              alt={p.name}
+              className="h-7 w-7 rounded-full overflow-hidden bg-cream-100"
+              imgClassName="object-cover"
+            />
             <span className="text-xs font-medium">{p.name}</span>
           </button>
         ))}
@@ -62,7 +79,7 @@ export function AddPetModal({
   onConfirm: (p: PetProfile) => void
 }) {
   const [name, setName] = useState('')
-  const [avatar, setAvatar] = useState(AVATARS[0])
+  const [avatar, setAvatar] = useState<string>(AVATARS[0].src)
   const [gender, setGender] = useState<Gender>('male')
   const [neutered, setNeutered] = useState(true)
   const [weight, setWeight] = useState('4.0')
@@ -119,13 +136,20 @@ export function AddPetModal({
         />
 
         <label className="block text-sm text-ink-700 mb-1">头像</label>
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
           {AVATARS.map((a) => (
             <button
-              key={a}
-              onClick={() => setAvatar(a)}
-              className={`h-10 w-10 rounded-2xl grid place-items-center text-xl ${avatar === a ? 'bg-brand-500 ring-2 ring-brand-200' : 'bg-cream-100'}`}
-            >{a}</button>
+              key={a.key}
+              onClick={() => setAvatar(a.src)}
+              className={`h-12 w-12 shrink-0 rounded-2xl overflow-hidden ${avatar === a.src ? 'ring-2 ring-brand-500 bg-brand-50' : 'bg-cream-100'}`}
+            >
+              <PetAvatar
+                src={a.src}
+                alt=""
+                className="h-full w-full"
+                imgClassName="object-cover"
+              />
+            </button>
           ))}
         </div>
 

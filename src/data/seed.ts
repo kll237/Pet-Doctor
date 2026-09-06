@@ -1,10 +1,11 @@
 import dayjs from 'dayjs'
 import type { AIAnalysisRecord, ChatMessage, DayLog, PetProfile } from '@/types'
+import { CATS } from '@/lib/cats'
 
 /** 单只宠物的默认档案模板（用于"添加宠物"时初始化） */
 export function makePet(partial: Partial<PetProfile> & { id: string; name: string }): PetProfile {
   return {
-    avatar: '🐱',
+    avatar: CATS.puddingAvatar,
     species: 'cat',
     birthDate: dayjs().subtract(2, 'year').format('YYYY-MM-DD'),
     ageLabel: '2岁0个月',
@@ -30,7 +31,7 @@ export function makePet(partial: Partial<PetProfile> & { id: string; name: strin
 const pudding = makePet({
   id: 'pudding',
   name: '布丁',
-  avatar: '🧡',
+  avatar: CATS.puddingAvatar,
   birthDate: '2021-03-16',
   ageLabel: '3岁2个月',
   weight: 4.2,
@@ -55,7 +56,7 @@ const pudding = makePet({
 const naicha = makePet({
   id: 'naicha',
   name: '奶茶',
-  avatar: '🩶',
+  avatar: CATS.puddingAvatar, // 用同一张布丁图作为占位（演示用）
   birthDate: '2023-07-01',
   ageLabel: '1岁2个月',
   weight: 3.1,
@@ -144,7 +145,7 @@ export function makeSeedAnalyses(petName: string): AIAnalysisRecord[] {
     {
       id: `a1-${petName}`,
       date: dayjs().subtract(2, 'day').format('YYYY-MM-DD 14:30'),
-      thumb: '🐱',
+      thumb: CATS.puddingSideFace,
       parts: ['眼睛', '耳朵'],
       result: `${petName}眼部泪痕偏多，建议每日擦拭`,
       severity: 'warn',
@@ -152,7 +153,7 @@ export function makeSeedAnalyses(petName: string): AIAnalysisRecord[] {
     {
       id: `a2-${petName}`,
       date: dayjs().subtract(4, 'day').format('YYYY-MM-DD 10:20'),
-      thumb: '😺',
+      thumb: CATS.puddingLying,
       parts: ['皮毛毛发'],
       result: `${petName}毛发顺滑，无打结掉毛`,
       severity: 'ok',
@@ -160,7 +161,7 @@ export function makeSeedAnalyses(petName: string): AIAnalysisRecord[] {
     {
       id: `a3-${petName}`,
       date: dayjs().subtract(6, 'day').format('YYYY-MM-DD 16:40'),
-      thumb: '😻',
+      thumb: CATS.puddingSitting,
       parts: ['整体状态'],
       result: `${petName}耳朵干净，状态良好`,
       severity: 'ok',

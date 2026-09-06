@@ -4,13 +4,14 @@ import { useChatStore } from '@/store/chatStore'
 import { useUIStore } from '@/store/uiStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { suggestionsFor } from '@/lib/aiDoctor'
-import BlackCat from './BlackCat'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 悬浮在右下角的猫宁医生入口：
- * - 默认是圆形悬浮按钮 + "问询猫宁医生"提示标签
+ * - 默认是圆形悬浮按钮（猫医生打招呼图）+ "问询猫宁医生"提示标签
  * - 点击展开全屏对话浮窗
- * - 模拟大模型回复（生产可替换为真实 LLM API）
+ * - 医生气泡头像使用真实"猫医生·打招呼"图
  */
 export default function BlackCatDoctor() {
   const { doctorOpen, setDoctorOpen, toggleDoctor } = useUIStore()
@@ -52,13 +53,18 @@ export default function BlackCatDoctor() {
             >
               问询猫宁医生
             </motion.div>
-            {/* 圆头像 */}
+            {/* 圆头像（真实医生图） */}
             <button
               onClick={toggleDoctor}
               className="relative h-14 w-14 rounded-full bg-brand-100 shadow-float ring-2 ring-white/60 active:scale-95 transition-transform overflow-hidden"
               aria-label="宠物医生"
             >
-              <BlackCat size={56} />
+              <PetAvatar
+                src={CATS.doctorGreeting}
+                alt="猫宁医生"
+                className="h-full w-full"
+                imgClassName="object-cover"
+              />
               <span className="absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-alert text-[10px] text-white shadow">…</span>
             </button>
           </motion.div>
@@ -94,9 +100,12 @@ export default function BlackCatDoctor() {
 
             {/* 医生信息 */}
             <div className="px-4 pt-4 pb-2 flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-brand-100 ring-2 ring-white shadow-card overflow-hidden">
-                <BlackCat size={48} />
-              </div>
+              <PetAvatar
+                src={CATS.doctorGreeting}
+                alt="猫宁医生"
+                className="h-12 w-12 rounded-2xl ring-2 ring-white shadow-card overflow-hidden bg-brand-100"
+                imgClassName="object-cover"
+              />
               <div className="flex-1">
                 <div className="text-sm font-semibold">AI 宠物医生 · 猫宁医生</div>
                 <div className="text-xs text-ink-400">基于日志 + 模型综合分析 · 仅供参考</div>
@@ -110,9 +119,12 @@ export default function BlackCatDoctor() {
               ))}
               {sending && (
                 <div className="flex items-end gap-2">
-                  <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center overflow-hidden">
-                    <BlackCat size={32} />
-                  </div>
+                  <PetAvatar
+                    src={CATS.doctorGreeting}
+                    alt="猫宁医生"
+                    className="h-8 w-8 rounded-full overflow-hidden bg-brand-100 shrink-0"
+                    imgClassName="object-cover"
+                  />
                   <div className="rounded-2xl bg-white px-3 py-2 shadow-card">
                     <Dots />
                   </div>
@@ -175,9 +187,12 @@ function Bubble({ role, content }: { role: 'user' | 'doctor'; content: string })
   }
   return (
     <div className="flex items-end gap-2">
-      <div className="h-8 w-8 rounded-full bg-brand-100 grid place-items-center overflow-hidden shadow-card shrink-0">
-        <BlackCat size={32} />
-      </div>
+      <PetAvatar
+        src={CATS.doctorGreeting}
+        alt="猫宁医生"
+        className="h-8 w-8 rounded-full overflow-hidden bg-brand-100 shadow-card shrink-0"
+        imgClassName="object-cover"
+      />
       <div className="max-w-[78%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm text-ink-700 shadow-card whitespace-pre-wrap leading-relaxed">
         {content}
       </div>

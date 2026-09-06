@@ -4,6 +4,8 @@ import dayjs from 'dayjs'
 import { useLogStore } from '@/store/logStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useUIStore } from '@/store/uiStore'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 每日日志 - 严格对齐原型图：
@@ -11,7 +13,7 @@ import { useUIStore } from '@/store/uiStore'
  * - 5 月周历（18-24）
  * - 今日记录概览（橙色进度条 + 去补全）
  * - 5 个状态项卡片（圆形彩色图标 + 标题 + 描述 + 状态 pill）
- * - 底部大橙色 "记录今日状态" 按钮
+ * - 底部大橙色 "记录今日状态" 按钮 + 黑色小猫装饰
  */
 export default function LogPage() {
   const nav = useNavigate()
@@ -51,7 +53,7 @@ export default function LogPage() {
     : []
 
   return (
-    <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
+    <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full relative">
       {/* 顶部 */}
       <div className="flex items-center justify-between">
         <button onClick={() => nav(-1)} className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center">
@@ -134,7 +136,7 @@ export default function LogPage() {
         ))}
       </div>
 
-      {/* 底部大橙色 CTA */}
+      {/* 底部大橙色 CTA + 黑色小猫装饰 */}
       <button
         onClick={() => openSheet('summary', selectedDate)}
         className="mt-4 w-full rounded-2xl bg-brand-500 py-3.5 text-white text-sm font-medium shadow-card flex items-center justify-center gap-1.5 active:scale-[0.98]"
@@ -143,7 +145,19 @@ export default function LogPage() {
         记录今日状态
       </button>
 
-      <div className="mt-2 text-center text-[11px] text-ink-400">{completed}/{itemsCount} 完成 · {pet.name}</div>
+      <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-ink-400">
+        <span>{completed}/{itemsCount} 完成 · {pet.name}</span>
+      </div>
+
+      {/* 右下角小黑猫装饰（贴在按钮下方，与原型一致） */}
+      <div className="pointer-events-none absolute right-2 -bottom-2 sm:right-6 sm:bottom-2 w-20 h-20">
+        <PetAvatar
+          src={CATS.decoLogBlack}
+          alt="小黑猫"
+          className="h-full w-full rounded-full overflow-hidden bg-transparent"
+          imgClassName="object-contain"
+        />
+      </div>
     </div>
   )
 }

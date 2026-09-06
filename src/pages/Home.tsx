@@ -2,15 +2,16 @@ import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useLogStore } from '@/store/logStore'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 首页 - 严格对齐原型图：
- * - 顶部：头像 + 名字 + 通知
- * - 今日健康状态大卡（带天气 + 86分 + 健康 + 描述）
- * - AI 宠物照片分析（左侧文案 + 右侧橙色"去拍照"按钮）
- * - 6 格紧凑指标（3×2，圆形图标，色块装饰）
- * - 健康风险提示（绿色盾牌 + 文字）
- * - （不再有底部 4 快捷入口，导航交给 BottomNav）
+ * - 顶部：头像（橘猫布丁圆形头像）+ 名字 + 通知
+ * - 今日健康状态大卡（橘猫布丁坐姿图 + 86分 + 健康 + 描述）
+ * - AI 宠物照片分析（白底卡 + 橘猫布丁侧脸 + 橙色"去拍照"按钮）
+ * - 6 格紧凑指标（3×2）
+ * - 健康风险提示（带绿盾的黑猫装饰图）
  */
 export default function HomePage() {
   const nav = useNavigate()
@@ -43,12 +44,14 @@ export default function HomePage() {
 
   return (
     <div className="px-4 pt-2 pb-20 bg-cream-50 min-h-full">
-      {/* 顶部：头像 + 宠物信息 + 通知 */}
+      {/* 顶部：橘猫头像 + 宠物信息 + 通知 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl overflow-hidden bg-cream-200 shadow-card grid place-items-center text-2xl">
-            {pet.avatar}
-          </div>
+          <PetAvatar
+            src={pet.avatar || CATS.puddingAvatar}
+            alt={pet.name}
+            className="h-12 w-12 rounded-2xl overflow-hidden bg-cream-200 shadow-card"
+          />
           <div className="leading-tight">
             <div className="flex items-center gap-1">
               <span className="text-base font-semibold">{pet.name}</span>
@@ -65,7 +68,7 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* 今日健康状态大卡 */}
+      {/* 今日健康状态大卡（含橘猫坐姿图） */}
       <div className="relative mt-3 rounded-3xl bg-gradient-to-br from-cream-100 to-cream-50 shadow-card overflow-hidden">
         <div className="px-5 pt-4 pb-1 flex items-start justify-between">
           <div>
@@ -87,20 +90,33 @@ export default function HomePage() {
             </div>
             <div className="mt-0.5 text-xs text-ink-700">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
           </div>
-          <div className="text-[64px] leading-none opacity-20 select-none">🐱</div>
+          {/* 右侧：橘猫坐姿图（替换原 emoji） */}
+          <PetAvatar
+            src={CATS.puddingSitting}
+            alt="布丁"
+            className="absolute right-0 bottom-0 w-32 h-32 pointer-events-none"
+            imgClassName="object-contain object-bottom"
+          />
         </div>
       </div>
 
-      {/* AI 宠物照片分析（白底卡 + 右侧橙色按钮） */}
+      {/* AI 宠物照片分析（白底卡 + 橘猫侧脸 + 右侧橙色按钮） */}
       <button
         onClick={() => nav('/ai')}
         className="mt-3 w-full rounded-3xl bg-white shadow-card px-4 py-3.5 flex items-center justify-between active:scale-[0.99] transition-transform"
       >
-        <div className="text-left">
-          <div className="text-sm font-semibold">AI 宠物照片分析</div>
-          <div className="text-[11px] text-ink-400 mt-0.5">上传/拍照，AI 识别健康状况</div>
+        <div className="flex items-center gap-3 text-left min-w-0">
+          <PetAvatar
+            src={CATS.puddingSideFace}
+            alt="布丁"
+            className="h-11 w-11 rounded-xl overflow-hidden bg-cream-100 shadow-card shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold">AI 宠物照片分析</div>
+            <div className="text-[11px] text-ink-400 mt-0.5">上传/拍照，AI 识别健康状况</div>
+          </div>
         </div>
-        <div className="rounded-2xl bg-brand-500 text-white px-3.5 py-2 text-xs font-medium inline-flex items-center gap-1.5 shadow-card">
+        <div className="rounded-2xl bg-brand-500 text-white px-3.5 py-2 text-xs font-medium inline-flex items-center gap-1.5 shadow-card shrink-0">
           <CameraIcon /> 去拍照
         </div>
       </button>
@@ -120,11 +136,13 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* 健康风险提示（绿色盾牌 + 文字） */}
+      {/* 健康风险提示（带绿盾的黑猫装饰图） */}
       <div className="mt-3 rounded-3xl bg-cream-100 px-4 py-3 flex items-center gap-3 shadow-card">
-        <div className="h-9 w-9 rounded-full bg-ok grid place-items-center text-white shrink-0">
-          <ShieldIcon />
-        </div>
+        <PetAvatar
+          src={CATS.decoHealthBlack}
+          alt="健康猫"
+          className="h-14 w-14 rounded-full overflow-hidden bg-white shadow-card shrink-0"
+        />
         <div className="flex-1 leading-tight min-w-0">
           <div className="text-sm font-semibold">健康风险提示</div>
           <div className={`mt-0.5 text-xs font-medium ${riskLevel === '无异常' ? 'text-ok' : 'text-warn'}`}>{riskLevel}</div>
@@ -147,4 +165,3 @@ function MoonIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fil
 function BellIcon() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 16V11a6 6 0 0 1 12 0v5l1 2H5l1-2zM10 21a2 2 0 0 0 4 0" stroke="#3F392F" strokeWidth="1.6" strokeLinejoin="round"/></svg> }
 function SunIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="#F5A524"/><g stroke="#F5A524" strokeWidth="1.6" strokeLinecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></g></svg> }
 function CameraIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" stroke="#fff" strokeWidth="1.6"/><circle cx="12" cy="13" r="3.4" stroke="#fff" strokeWidth="1.6"/></svg> }
-function ShieldIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg> }

@@ -3,15 +3,17 @@ import dayjs from 'dayjs'
 import { useAnalysisStore } from '@/store/analysisStore'
 import { useUIStore } from '@/store/uiStore'
 import { usePetStore } from '@/store/petStore'
+import { CATS } from '@/lib/cats'
+import { PetAvatar } from '@/components/PetAvatar'
 
 const PARTS = ['眼睛', '耳朵', '鼻子', '口腔', '皮肤毛发', '整体状态']
 
 /**
  * AI 照片分析 - 严格对齐原型图：
  * - 中标题 + 右上"..."菜单
- * - 上传/拍照分析（白底卡 + 大圆形橙色相机 + 左右样图）
+ * - 上传/拍照分析（白底卡 + 大圆形橙色相机 + 左右橘猫样图）
  * - 可分析部位（3×2 圆角方块 + 圆形图标）
- * - 最近分析记录（缩略图 + 时间 + 描述 + 状态）
+ * - 最近分析记录（橘猫缩略图 + 时间 + 描述 + 状态）
  */
 export default function AIAnalysisPage() {
   const currentId = usePetStore((s) => s.currentId)
@@ -27,7 +29,7 @@ export default function AIAnalysisPage() {
     r.onload = () => {
       add({
         date: dayjs().format('YYYY-MM-DD HH:mm'),
-        thumb: '🐱',
+        thumb: CATS.puddingSideFace,
         parts: ['整体状态'],
         result: '已上传 · 待 AI 分析（demo）',
         severity: 'ok',
@@ -42,7 +44,7 @@ export default function AIAnalysisPage() {
     const r = mockAIResult()
     add({
       date: dayjs().format('YYYY-MM-DD HH:mm'),
-      thumb: '🐱',
+      thumb: CATS.puddingSideFace,
       parts: r.parts,
       result: r.result,
       severity: r.severity,
@@ -59,14 +61,18 @@ export default function AIAnalysisPage() {
         </button>
       </div>
 
-      {/* 上传/拍照分析（白底卡 + 大圆形相机 + 左右样图） */}
+      {/* 上传/拍照分析（白底卡 + 大圆形相机 + 左右橘猫样图） */}
       <div className="mt-3 rounded-3xl bg-white shadow-card px-5 py-5 text-center">
         <div className="text-sm font-semibold">上传/拍照分析</div>
         <div className="mt-1 text-[11px] text-ink-400">拍摄或上传宠物照片，AI 识别健康问题</div>
 
         <div className="mt-3 flex items-center justify-center gap-2">
-          {/* 左侧样图 */}
-          <div className="h-14 w-14 rounded-2xl bg-cream-100 grid place-items-center text-2xl shadow-card">🐱</div>
+          {/* 左侧橘猫样图（趴着） */}
+          <PetAvatar
+            src={CATS.puddingLying}
+            alt="布丁样图1"
+            className="h-14 w-14 rounded-2xl overflow-hidden bg-cream-100 shadow-card"
+          />
           {/* 大圆形相机按钮 */}
           <button
             onClick={() => fileRef.current?.click()}
@@ -78,8 +84,12 @@ export default function AIAnalysisPage() {
               <circle cx="12" cy="13" r="3.4" stroke="#fff" strokeWidth="1.6"/>
             </svg>
           </button>
-          {/* 右侧样图 */}
-          <div className="h-14 w-14 rounded-2xl bg-cream-100 grid place-items-center text-2xl shadow-card">😺</div>
+          {/* 右侧橘猫样图（侧脸） */}
+          <PetAvatar
+            src={CATS.puddingSideFace}
+            alt="布丁样图2"
+            className="h-14 w-14 rounded-2xl overflow-hidden bg-cream-100 shadow-card"
+          />
         </div>
         <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onPick} />
 
@@ -116,7 +126,11 @@ export default function AIAnalysisPage() {
         {records.map((r) => (
           <div key={r.id} className="px-4 pb-3">
             <div className="rounded-2xl bg-cream-50 px-3 py-2.5 flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-white grid place-items-center text-xl shrink-0">{r.thumb}</div>
+              <PetAvatar
+                src={r.thumb}
+                alt="分析缩略图"
+                className="h-12 w-12 rounded-2xl overflow-hidden bg-white shrink-0"
+              />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-[10px] text-ink-400">{r.date}</div>
