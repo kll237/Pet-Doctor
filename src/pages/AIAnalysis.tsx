@@ -100,7 +100,16 @@ export default function AIAnalysisPage() {
 
       {/* 可分析部位（3×2 圆角方块） */}
       <div className="mt-3 rounded-3xl bg-white shadow-card px-4 py-4">
-        <div className="text-sm font-semibold">可分析部位</div>
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-semibold">可分析部位</div>
+          {/* 右上角小黑猫装饰（原型 AI 页） */}
+          <PetAvatar
+            src={CATS.decoAiBlack}
+            alt="小黑猫"
+            className="h-9 w-9 rounded-full overflow-hidden bg-cream-100"
+            imgClassName="object-cover"
+          />
+        </div>
         <div className="mt-3 grid grid-cols-3 gap-2.5">
           {PARTS.map((p, i) => (
             <button

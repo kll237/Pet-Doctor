@@ -17,12 +17,12 @@ export const CATS = {
   puddingSleeping: '/cats/pudding-sleeping.jpg',      // 睡觉（备用）
 
   // ── 猫宁医生（黑猫医生） ──────────────────────
+  // 注意：只保留 public/cats/ 下真实存在的 4 张，
+  // 引用不存在的图片会导致裂图，新增图片时须同步更新此处。
   doctorGreeting: '/cats/doctor-greeting.jpg',        // 打招呼（浮窗按钮、聊天气泡头像）
-  doctorThinking: '/cats/doctor-thinking.jpg',        // 思考
-  doctorSmile: '/cats/doctor-smile.jpg',              // 微笑
+  doctorThinking: '/cats/doctor-thinking.jpg',        // 看书/思考
   doctorSuggest: '/cats/doctor-suggest.jpg',          // 指示建议
-  doctorRecording: '/cats/doctor-recording.jpg',      // 记录（备用）
-  doctorChat: '/cats/doctor-chat.jpg',                // 对话（备用）
+  doctorRecording: '/cats/doctor-recording.jpg',      // 记录
 
   // ── 装饰小黑猫（页面里的小点缀） ──────────────
   decoHomeBlack: '/cats/deco-home.jpg',               // 首页小黑猫（戴蓝领结）
