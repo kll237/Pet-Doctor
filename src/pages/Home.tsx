@@ -79,25 +79,22 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* 今日健康状态大卡（含橘猫坐姿图 - 让布丁和卡片融为一体） */}
+      {/* 今日健康状态大卡（橘猫脸部插画融入，与原型一致：左文字+右猫头） */}
       <div className="relative mt-3 rounded-3xl bg-gradient-to-br from-[#FFF1DA] via-[#FFE7C7] to-[#FCD9A8] shadow-card overflow-hidden">
-        <div className="relative px-5 pt-4 pb-1">
-          {/* 右侧：布丁坐姿图作为插画融入（占右侧半幅，从顶部到底部延伸） */}
+        <div className="relative px-5 pt-4 pb-4 min-h-[150px]">
+          {/* 右侧：布丁脸部插画（占右半，融在卡片背景里） */}
           <PetAvatar
-            src={CATS.puddingSitting}
+            src={CATS.puddingHero}
             alt="布丁"
-            className="absolute right-0 top-0 bottom-0 w-[58%] pointer-events-none"
+            className="absolute right-0 top-0 bottom-0 w-[55%] pointer-events-none"
             imgClassName="object-cover object-center"
           />
           {/* 文字层浮在猫图之上，避免被遮 */}
-          <div className="relative z-10">
-            <div className="flex items-start justify-between">
-              <div>
+          <div className="relative z-10 max-w-[52%]">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
                 <div className="text-sm font-semibold text-ink-900">今日健康状态</div>
                 <div className="text-[11px] text-ink-400 mt-0.5">{dayjs().format('YYYY年M月DD日')} · 周{weekdayCN(dayjs().day())}</div>
-              </div>
-              <div className="flex items-center gap-1 text-warn text-xs font-medium">
-                <SunIcon /> <span>{(todayLog?.weatherC ?? 25)}°C</span>
               </div>
             </div>
             <div className="mt-3">
@@ -108,8 +105,12 @@ export default function HomePage() {
               <div className="mt-2 text-warn text-sm font-semibold inline-flex items-center gap-1">
                 <span>✓</span>{todayLog?.summary.label ?? '健康'}
               </div>
-              <div className="mt-0.5 text-xs text-ink-700 max-w-[60%]">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
+              <div className="mt-0.5 text-xs text-ink-700">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
             </div>
+          </div>
+          {/* 天气放在最右上方（猫图覆盖前的位置） */}
+          <div className="absolute right-3 top-3 z-10 flex items-center gap-1 text-warn text-xs font-medium">
+            <SunIcon /> <span>{(todayLog?.weatherC ?? 25)}°C</span>
           </div>
         </div>
       </div>

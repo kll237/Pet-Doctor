@@ -13,8 +13,9 @@ export const CATS = {
   puddingAvatar: '/cats/pudding-avatar.jpg',          // 圆形头像（Home/Profile/Trend 顶部）
   puddingSideFace: '/cats/pudding-side.jpg',          // 侧脸（AI 分析卡缩略图）
   puddingLying: '/cats/pudding-lying.jpg',            // 趴着（AI 拍摄样图）
-  puddingSitting: '/cats/pudding-sitting.jpg',        // 坐姿（Home 大卡、Daily Report 大圆）
+  puddingSitting: '/cats/pudding-sitting.jpg',        // 坐姿（DailyReport、PetSwitcher、AI 兜底）
   puddingSleeping: '/cats/pudding-sleeping.jpg',      // 睡觉（备用）
+  puddingHero: '/cats/pudding-hero.jpg',              // 主页大卡专用插画（用户新提供，奶油橘白猫）
 
   // ── 猫宁医生（黑猫医生） ──────────────────────
   // 注意：只保留 public/cats/ 下真实存在的 4 张，
