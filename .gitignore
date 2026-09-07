@@ -21,3 +21,6 @@ screenshots/
 
 # stale build rename (vite build workaround)
 dist_bak/
+
+# local dev-server launcher (keep locally, don't publish)
+_launch-vite.ps1

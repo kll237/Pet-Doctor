@@ -13,12 +13,21 @@ import RecordSheet from '@/components/RecordSheet'
 import { useUIStore } from '@/store/uiStore'
 
 export default function App() {
-  const { setPathname } = useUIStore()
+  const { setPathname, doctorOpen, setDoctorOpen } = useUIStore()
   const loc = useLocation()
 
   useEffect(() => {
     setPathname(loc.pathname)
   }, [loc.pathname, setPathname])
+
+  // 调试入口：URL 带 ?openDoctor=1 自动展开医生浮窗（截图/演示用）
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('openDoctor') && !doctorOpen) {
+      setDoctorOpen(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loc.pathname])
 
   return (
     <Layout>

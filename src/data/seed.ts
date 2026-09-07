@@ -52,11 +52,11 @@ const pudding = makePet({
   },
 })
 
-/** 第二只宠物：奶茶（灰猫，妹妹，已绝育）——用于演示多宠物切换 */
+/** 第二只宠物：奶茶（黑猫，妹妹，已绝育，戴蓝领结）——用于演示多宠物切换 */
 const naicha = makePet({
   id: 'naicha',
   name: '奶茶',
-  avatar: CATS.puddingAvatar, // 用同一张布丁图作为占位（演示用）
+  avatar: CATS.decoHomeBlack, // 小黑猫·蓝领结（用户在最新一轮要求作为奶茶头像）
   birthDate: '2023-07-01',
   ageLabel: '1岁2个月',
   weight: 3.1,

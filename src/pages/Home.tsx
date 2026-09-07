@@ -43,7 +43,7 @@ export default function HomePage() {
   const riskDesc = !todayLog ? '继续保持当前的健康状态' : todayLog.summary.description
 
   return (
-    <div className="px-4 pt-2 pb-20 bg-cream-50 min-h-full">
+    <div className="px-4 pt-2 pb-28 bg-cream-50 min-h-full">
       {/* 顶部：橘猫头像 + 宠物信息 + 通知 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -90,12 +90,12 @@ export default function HomePage() {
             </div>
             <div className="mt-0.5 text-xs text-ink-700">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
           </div>
-          {/* 右侧：橘猫坐姿图（替换原 emoji） */}
+          {/* 右侧：布丁坐姿图（再缩一些，避免抢占健康状态文字的空间） */}
           <PetAvatar
             src={CATS.puddingSitting}
             alt="布丁"
-            className="absolute right-0 bottom-0 w-32 h-32 pointer-events-none"
-            imgClassName="object-contain object-bottom"
+            className="absolute right-1 top-3 w-16 h-20 pointer-events-none"
+            imgClassName="object-contain object-top"
           />
         </div>
       </div>

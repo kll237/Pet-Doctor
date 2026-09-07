@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { AddPetModal } from '@/components/PetSwitcher'
 import { CATS } from '@/lib/cats'
@@ -23,6 +23,15 @@ export default function ProfilePage() {
   const setHealth = usePetStore((s) => s.setHealth)
   const [edit, setEdit] = useState(false)
   const [adding, setAdding] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onPickAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const r = new FileReader()
+    r.onload = () => updatePet({ avatar: r.result as string })
+    r.readAsDataURL(f)
+  }
 
   return (
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
@@ -41,11 +50,17 @@ export default function ProfilePage() {
 
       {/* 头像 + 名字（奶油色卡） */}
       <div className="mt-3 rounded-3xl bg-gradient-to-br from-cream-100 to-cream-50 shadow-card px-4 py-3.5 flex items-center gap-3">
-        <PetAvatar
-          src={pet.avatar || CATS.puddingAvatar}
-          alt={pet.name}
-          className="h-14 w-14 rounded-2xl overflow-hidden bg-white shadow-card"
-        />
+        <button
+          onClick={() => edit && fileRef.current?.click()}
+          className={`relative h-14 w-14 rounded-2xl overflow-hidden bg-white shadow-card ${edit ? 'ring-2 ring-brand-300 ring-offset-2 ring-offset-cream-50' : ''}`}
+          aria-label={edit ? '点击更换头像' : '头像'}
+        >
+          <PetAvatar src={pet.avatar || CATS.puddingAvatar} alt={pet.name} className="h-full w-full" imgClassName="object-cover" />
+          {edit && (
+            <span className="absolute inset-0 grid place-items-center bg-black/30 text-white text-[10px]">更换</span>
+          )}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
         <div className="flex-1 leading-tight min-w-0">
           {edit ? (
             <input

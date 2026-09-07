@@ -1,17 +1,20 @@
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { useChatStore } from '@/store/chatStore'
 import { useUIStore } from '@/store/uiStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
+import { useLogStore } from '@/store/logStore'
 import { suggestionsFor } from '@/lib/aiDoctor'
 import { CATS } from '@/lib/cats'
 import { PetAvatar } from '@/components/PetAvatar'
 
 /**
  * 悬浮在右下角的猫宁医生入口：
- * - 默认是圆形悬浮按钮（猫医生打招呼图）+ "问询猫宁医生"提示标签
+ * - 圆形悬浮按钮（猫医生打招呼图），按钮右上角绿色"在线"点（避免与猫脸重叠）
+ * - 旁边"问询猫宁医生"提示标签，带小三角尾巴像聊天气泡
  * - 点击展开全屏对话浮窗
- * - 医生气泡头像使用真实"猫医生·打招呼"图
+ * - 对话末尾根据上下文插入"行动建议"卡：记录到今日日志 / 需要就医建议 / 预约复查提醒
  */
 export default function BlackCatDoctor() {
   const { doctorOpen, setDoctorOpen, toggleDoctor } = useUIStore()
@@ -19,12 +22,21 @@ export default function BlackCatDoctor() {
   const pet = useCurrentPet()
   const messages = useChatStore((s) => s.byPet[currentId] ?? [])
   const { sending, send } = useChatStore()
+  const recomputeOverall = useLogStore((s) => s.recomputeOverall)
   const [input, setInput] = useState('')
+  const [toast, setToast] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const nav = useNavigate()
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, doctorOpen])
+  }, [messages, doctorOpen, toast])
+
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 1800)
+    return () => clearTimeout(t)
+  }, [toast])
 
   const onSend = async () => {
     if (!input.trim() || sending) return
@@ -33,41 +45,58 @@ export default function BlackCatDoctor() {
     await send(txt)
   }
 
+  const handleAction = async (kind: 'log' | 'medical' | 'remind') => {
+    if (kind === 'log') {
+      // 收尾对话 + 关闭浮窗 + 跳转到日志页（带状态携带）
+      setDoctorOpen(false)
+      nav('/log')
+      return
+    }
+    if (kind === 'medical') {
+      await send('请给我一份就医建议')
+      return
+    }
+    if (kind === 'remind') {
+      await send('帮我设置一个 7 天后的复查提醒')
+      setToast('已请猫宁医生安排复查提醒')
+    }
+  }
+
   return (
     <>
-      {/* 悬浮按钮 */}
+      {/* 悬浮按钮（标签与按钮分离，带气泡尾巴） */}
       <AnimatePresence>
         {!doctorOpen && (
-          <motion.div
+          <motion.button
             initial={{ scale: 0, rotate: -30 }}
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0 }}
-            className="abs bottom-[88px] right-3 z-40 flex items-end gap-1.5"
+            onClick={toggleDoctor}
+            className="abs bottom-[104px] right-3 z-40 flex items-end gap-1"
+            aria-label="宠物医生"
           >
-            {/* 标签 */}
-            <motion.div
+            {/* 标签（带小三角尾巴） */}
+            <motion.span
               initial={{ opacity: 0, x: 8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="rounded-2xl bg-white px-3 py-1.5 shadow-float text-xs text-ink-700 mb-1"
+              className="relative mb-2 rounded-2xl bg-white px-3 py-1.5 shadow-float text-xs text-ink-700 whitespace-nowrap"
             >
               问询猫宁医生
-            </motion.div>
-            {/* 圆头像（真实医生图） */}
-            <button
-              onClick={toggleDoctor}
-              className="relative h-14 w-14 rounded-full bg-brand-100 shadow-float ring-2 ring-white/60 active:scale-95 transition-transform overflow-hidden"
-              aria-label="宠物医生"
-            >
+              <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 rotate-45 bg-white shadow-[2px_-2px_2px_-2px_rgba(0,0,0,0.08)]" />
+            </motion.span>
+            {/* 圆头像（真实医生图，object-cover 防裁切出现"两只猫"错觉） */}
+            <span className="relative h-14 w-14 rounded-full bg-brand-100 shadow-float ring-2 ring-white grid place-items-center overflow-hidden">
               <PetAvatar
                 src={CATS.doctorGreeting}
                 alt="猫宁医生"
                 className="h-full w-full"
                 imgClassName="object-cover"
               />
-              <span className="absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-alert text-[10px] text-white shadow">…</span>
-            </button>
-          </motion.div>
+              {/* 绿色"在线"小圆点，放在右下角避开猫脸 */}
+              <span className="absolute right-0.5 bottom-0.5 h-3 w-3 rounded-full bg-ok ring-2 ring-white" />
+            </span>
+          </motion.button>
         )}
       </AnimatePresence>
 
@@ -117,6 +146,12 @@ export default function BlackCatDoctor() {
               {messages.map((m) => (
                 <Bubble key={m.id} role={m.role} content={m.content} />
               ))}
+
+              {/* 行动建议卡：最后一条是医生回复且不在发送中时显示 */}
+              {!sending && messages.length > 0 && messages[messages.length - 1].role === 'doctor' && (
+                <ActionSuggestions onAct={handleAction} />
+              )}
+
               {sending && (
                 <div className="flex items-end gap-2">
                   <PetAvatar
@@ -168,7 +203,80 @@ export default function BlackCatDoctor() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 轻提示 toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            className="abs left-1/2 -translate-x-1/2 bottom-24 z-[60] rounded-full bg-ink-900/85 text-white text-xs px-3.5 py-1.5 shadow-float"
+          >
+            {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
+  )
+}
+
+/**
+ * 对话末尾的"行动建议"卡片：
+ * - 始终提供 3 个最常见动作：记录到今日日志 / 需要就医建议 / 预约复查提醒
+ * - 用户点击后：记录到日志 → 关闭浮窗跳日志页；就医/提醒 → 触发一条对话消息让猫宁医生展开
+ */
+function ActionSuggestions({ onAct }: { onAct: (k: 'log' | 'medical' | 'remind') => void }) {
+  const items: { key: 'log' | 'medical' | 'remind'; icon: React.ReactNode; title: string; sub: string; cls: string }[] = [
+    {
+      key: 'log',
+      icon: <IconNote />,
+      title: '记录到今日日志',
+      sub: '把刚才的描述整理进当日记录',
+      cls: 'bg-brand-50 text-brand-700',
+    },
+    {
+      key: 'medical',
+      icon: <IconStetho />,
+      title: '需要就医建议',
+      sub: '让医生判断是否需要去医院',
+      cls: 'bg-warn/10 text-warn',
+    },
+    {
+      key: 'remind',
+      icon: <IconBell />,
+      title: '预约复查提醒',
+      sub: '设置 7 天后的复查提醒',
+      cls: 'bg-info/10 text-info',
+    },
+  ]
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl bg-white border border-cream-200 shadow-card p-3 mt-1"
+    >
+      <div className="text-[11px] text-ink-400 mb-2 flex items-center gap-1">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-500" />
+        需要我帮你做点什么？
+      </div>
+      <div className="space-y-2">
+        {items.map((it) => (
+          <button
+            key={it.key}
+            onClick={() => onAct(it.key)}
+            className="w-full flex items-center gap-3 rounded-xl bg-cream-50 hover:bg-cream-100 px-3 py-2 active:scale-[0.99] transition-transform text-left"
+          >
+            <span className={`h-9 w-9 rounded-xl grid place-items-center ${it.cls}`}>{it.icon}</span>
+            <div className="flex-1 leading-tight min-w-0">
+              <div className="text-sm font-semibold text-ink-700">{it.title}</div>
+              <div className="text-[11px] text-ink-400">{it.sub}</div>
+            </div>
+            <span className="text-ink-300 text-base">›</span>
+          </button>
+        ))}
+      </div>
+    </motion.div>
   )
 }
 
@@ -214,3 +322,21 @@ function Dots() {
     </span>
   )
 }
+
+const IconNote = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+    <path d="M14 3v5h5M8 12h8M8 16h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+  </svg>
+)
+const IconStetho = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M5 3v6a4 4 0 0 0 8 0V3M7 3h4M9 13v3a4 4 0 0 0 8 0v-2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="17" cy="12" r="2" stroke="currentColor" strokeWidth="1.6"/>
+  </svg>
+)
+const IconBell = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <path d="M6 16V11a6 6 0 0 1 12 0v5l1 2H5l1-2zM10 21a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+  </svg>
+)

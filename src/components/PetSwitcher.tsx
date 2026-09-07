@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePetStore, makePet } from '@/store/petStore'
 import type { Gender, PetProfile } from '@/types'
@@ -6,7 +6,7 @@ import { CATS } from '@/lib/cats'
 import { PetAvatar } from '@/components/PetAvatar'
 
 /** 添加宠物时可选择的头像（用同一只布丁的不同姿势 + 装饰小黑猫） */
-const AVATARS: { src: string; key: string }[] = [
+const PRESET_AVATARS: { src: string; key: string }[] = [
   { src: CATS.puddingAvatar,   key: 'pudding-avatar' },
   { src: CATS.puddingSideFace,  key: 'pudding-side' },
   { src: CATS.puddingLying,     key: 'pudding-lying' },
@@ -79,13 +79,22 @@ export function AddPetModal({
   onConfirm: (p: PetProfile) => void
 }) {
   const [name, setName] = useState('')
-  const [avatar, setAvatar] = useState<string>(AVATARS[0].src)
+  const [avatar, setAvatar] = useState<string>(PRESET_AVATARS[0].src)
   const [gender, setGender] = useState<Gender>('male')
   const [neutered, setNeutered] = useState(true)
   const [weight, setWeight] = useState('4.0')
   const [birth, setBirth] = useState('2023-01-01')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const canSave = name.trim().length > 0
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    const r = new FileReader()
+    r.onload = () => setAvatar(r.result as string)
+    r.readAsDataURL(f)
+  }
 
   const submit = () => {
     if (!canSave) return
@@ -135,20 +144,25 @@ export function AddPetModal({
           className="w-full rounded-2xl bg-cream-50 px-4 py-2.5 text-sm outline-none mb-4"
         />
 
-        <label className="block text-sm text-ink-700 mb-1">头像</label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-sm text-ink-700">头像</label>
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="text-xs text-brand-500 inline-flex items-center gap-1"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+            上传图片
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
+        </div>
         <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
-          {AVATARS.map((a) => (
+          {PRESET_AVATARS.map((a) => (
             <button
               key={a.key}
               onClick={() => setAvatar(a.src)}
               className={`h-12 w-12 shrink-0 rounded-2xl overflow-hidden ${avatar === a.src ? 'ring-2 ring-brand-500 bg-brand-50' : 'bg-cream-100'}`}
             >
-              <PetAvatar
-                src={a.src}
-                alt=""
-                className="h-full w-full"
-                imgClassName="object-cover"
-              />
+              <PetAvatar src={a.src} alt="" className="h-full w-full" imgClassName="object-cover" />
             </button>
           ))}
         </div>
@@ -195,15 +209,8 @@ export function AddPetModal({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={onClose}
-            className="rounded-2xl bg-cream-100 py-3 text-sm font-medium text-ink-700"
-          >取消</button>
-          <button
-            onClick={submit}
-            disabled={!canSave}
-            className="rounded-2xl bg-brand-500 py-3 text-sm font-medium text-white shadow-card disabled:opacity-50"
-          >保存并切换</button>
+          <button onClick={onClose} className="rounded-2xl bg-cream-100 py-3 text-sm font-medium text-ink-700">取消</button>
+          <button onClick={submit} disabled={!canSave} className="rounded-2xl bg-brand-500 py-3 text-sm font-medium text-white shadow-card disabled:opacity-50">保存并切换</button>
         </div>
       </motion.div>
     </motion.div>

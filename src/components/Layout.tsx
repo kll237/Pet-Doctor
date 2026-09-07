@@ -4,24 +4,15 @@ import PetSwitcher from './PetSwitcher'
 
 /**
  * 仿 iPhone 的手机壳：桌面端居中显示，手机端全屏。
- * 顶部 9:41 状态条 + 宠物切换条 + 标题区；底部 Tab 栏。
+ * 顶部已无假状态栏（移除固定的 9:41 + 信号/WiFi/电池），标题区直接是宠物切换条。
  */
 export default function Layout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen w-full bg-[#ECE6DC] flex items-stretch justify-center py-0 sm:py-6">
       <div className="phone-shell relative">
-        {/* 顶部状态条 */}
-        <div className="px-6 pt-2 pb-1 flex items-center justify-between text-[15px] font-semibold text-ink-700 select-none">
-          <span>9:41</span>
-          <div className="flex items-center gap-1.5">
-            <span className="i-signal">📶</span>
-            <span>📡</span>
-            <span>🔋</span>
-          </div>
-        </div>
         {/* 宠物切换条（全局，随时切换查看对应宠物） */}
         <PetSwitcher />
-        <div className="relative h-[calc(100%-92px)] flex flex-col">
+        <div className="relative h-[calc(100%-48px)] flex flex-col">
           <div className="flex-1 overflow-y-auto scrollbar-hide">{children}</div>
           <BottomNav />
         </div>
