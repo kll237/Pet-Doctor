@@ -82,12 +82,13 @@ export default function HomePage() {
       {/* 今日健康状态大卡（橘猫脸部插画融入，与原型一致：左文字+右猫头） */}
       <div className="relative mt-3 rounded-3xl bg-gradient-to-br from-[#FFF1DA] via-[#FFE7C7] to-[#FCD9A8] shadow-card overflow-hidden">
         <div className="relative px-5 pt-4 pb-4 min-h-[150px]">
-          {/* 右侧：布丁脸部插画（占右半，融在卡片背景里） */}
+          {/* 右侧：布丁脸部插画（占右半，融在卡片背景里）
+              用户提供的图是白底，用 mix-blend-multiply 让白色像素变成卡片底色（白色 × 任何色 = 任何色） */}
           <PetAvatar
             src={CATS.puddingHero}
             alt="布丁"
             className="absolute right-0 top-0 bottom-0 w-[55%] pointer-events-none"
-            imgClassName="object-cover object-center"
+            imgClassName="object-cover object-center mix-blend-multiply"
           />
           {/* 文字层浮在猫图之上，避免被遮 */}
           <div className="relative z-10 max-w-[52%]">
