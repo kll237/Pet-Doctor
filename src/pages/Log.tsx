@@ -176,16 +176,6 @@ export default function LogPage() {
       <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-ink-400">
         <span>{completed}/{itemsCount} 完成 · {pet.name}</span>
       </div>
-
-      {/* 右下角小黑猫装饰（贴在按钮下方，与原型一致） */}
-      <div className="pointer-events-none absolute right-2 -bottom-2 sm:right-6 sm:bottom-2 w-20 h-20">
-        <PetAvatar
-          src={CATS.decoLogBlack}
-          alt="小黑猫"
-          className="h-full w-full rounded-full overflow-hidden bg-transparent"
-          imgClassName="object-contain"
-        />
-      </div>
     </div>
   )
 }
