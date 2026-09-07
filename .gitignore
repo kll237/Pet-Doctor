@@ -18,6 +18,7 @@ vite.config.ts.timestamp-*.mjs
 # verification artifacts
 screenshots/
 *-dom.html
+screenshot_verify.mjs
 
 # stale build rename (vite build workaround)
 dist_bak/
