@@ -19,8 +19,8 @@ export default function Layout({ children }: PropsWithChildren) {
         <div className="relative h-[calc(100%-48px)] flex flex-col">
           <div className="flex-1 overflow-y-auto scrollbar-hide">{children}</div>
           <BottomNav />
-          {/* 底部装饰：左下角戴蓝领结的小黑猫，融入背景（mix-blend-multiply 让白底与卡片米色融合） */}
-          <div className="pointer-events-none absolute left-0 bottom-[56px] w-[110px] h-[80px] z-10">
+          {/* 底部装饰：居中放一只戴蓝领结的小黑猫，融入背景（mix-blend-multiply 让白底与卡片米色融合） */}
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-[60px] w-[180px] h-[120px] z-10">
             <PetAvatar
               src={CATS.decoBottomBlack}
               alt="小黑猫"
