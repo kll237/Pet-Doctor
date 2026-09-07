@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useLogStore } from '@/store/logStore'
+import { useMessagesStore } from '@/store/messagesStore'
 import { CATS } from '@/lib/cats'
 import { PetAvatar } from '@/components/PetAvatar'
 
@@ -42,6 +43,8 @@ export default function HomePage() {
   const riskLevel = !todayLog ? '无异常' : todayLog.overallScore >= 88 ? '无异常' : '轻微异常'
   const riskDesc = !todayLog ? '继续保持当前的健康状态' : todayLog.summary.description
 
+  const unread = useMessagesStore((s) => s.messages.filter((m) => !m.read).length)
+
   return (
     <div className="px-4 pt-2 pb-28 bg-cream-50 min-h-full">
       {/* 顶部：橘猫头像 + 宠物信息 + 通知 */}
@@ -62,41 +65,52 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <button className="relative h-9 w-9 rounded-full bg-white shadow-card grid place-items-center" aria-label="通知">
+        <button
+          onClick={() => nav('/messages')}
+          className="relative h-9 w-9 rounded-full bg-white shadow-card grid place-items-center active:scale-95 transition-transform"
+          aria-label="消息中心"
+        >
           <BellIcon />
-          <span className="absolute top-1.5 right-2 h-1.5 w-1.5 rounded-full bg-alert" />
+          {unread > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-alert text-white text-[10px] font-semibold grid place-items-center ring-2 ring-cream-50">
+              {unread > 99 ? '99+' : unread}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* 今日健康状态大卡（含橘猫坐姿图） */}
-      <div className="relative mt-3 rounded-3xl bg-gradient-to-br from-cream-100 to-cream-50 shadow-card overflow-hidden">
-        <div className="px-5 pt-4 pb-1 flex items-start justify-between">
-          <div>
-            <div className="text-sm font-semibold">今日健康状态</div>
-            <div className="text-[11px] text-ink-400 mt-0.5">{dayjs().format('YYYY年M月DD日')} · 周{weekdayCN(dayjs().day())}</div>
-          </div>
-          <div className="flex items-center gap-1 text-warn text-xs font-medium">
-            <SunIcon /> <span>{(todayLog?.weatherC ?? 25)}°C</span>
-          </div>
-        </div>
-        <div className="px-5 pb-4 pt-1 flex items-end justify-between">
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-5xl font-bold text-ink-900 leading-none">{todayLog?.overallScore ?? 86}</span>
-              <span className="text-base text-ink-900 leading-none">分</span>
-            </div>
-            <div className="mt-2 text-warn text-sm font-semibold inline-flex items-center gap-1">
-              <span>✓</span>{todayLog?.summary.label ?? '健康'}
-            </div>
-            <div className="mt-0.5 text-xs text-ink-700">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
-          </div>
-          {/* 右侧：布丁坐姿图（再缩一些，避免抢占健康状态文字的空间） */}
+      {/* 今日健康状态大卡（含橘猫坐姿图 - 让布丁和卡片融为一体） */}
+      <div className="relative mt-3 rounded-3xl bg-gradient-to-br from-[#FFF1DA] via-[#FFE7C7] to-[#FCD9A8] shadow-card overflow-hidden">
+        <div className="relative px-5 pt-4 pb-1">
+          {/* 右侧：布丁坐姿图作为插画融入（占右侧半幅，从顶部到底部延伸） */}
           <PetAvatar
             src={CATS.puddingSitting}
             alt="布丁"
-            className="absolute right-1 top-3 w-16 h-20 pointer-events-none"
-            imgClassName="object-contain object-top"
+            className="absolute right-0 top-0 bottom-0 w-[58%] pointer-events-none"
+            imgClassName="object-cover object-center"
           />
+          {/* 文字层浮在猫图之上，避免被遮 */}
+          <div className="relative z-10">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-sm font-semibold text-ink-900">今日健康状态</div>
+                <div className="text-[11px] text-ink-400 mt-0.5">{dayjs().format('YYYY年M月DD日')} · 周{weekdayCN(dayjs().day())}</div>
+              </div>
+              <div className="flex items-center gap-1 text-warn text-xs font-medium">
+                <SunIcon /> <span>{(todayLog?.weatherC ?? 25)}°C</span>
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-5xl font-bold text-ink-900 leading-none">{todayLog?.overallScore ?? 86}</span>
+                <span className="text-base text-ink-900 leading-none">分</span>
+              </div>
+              <div className="mt-2 text-warn text-sm font-semibold inline-flex items-center gap-1">
+                <span>✓</span>{todayLog?.summary.label ?? '健康'}
+              </div>
+              <div className="mt-0.5 text-xs text-ink-700 max-w-[60%]">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
+            </div>
+          </div>
         </div>
       </div>
 

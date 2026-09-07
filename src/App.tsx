@@ -8,6 +8,7 @@ import AIAnalysisPage from '@/pages/AIAnalysis'
 import TrendPage from '@/pages/Trend'
 import ProfilePage from '@/pages/Profile'
 import DailyReportPage from '@/pages/DailyReport'
+import MessagesPage from '@/pages/Messages'
 import RecordSheet from '@/components/RecordSheet'
 
 import { useUIStore } from '@/store/uiStore'
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/trend" element={<TrendPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/summary" element={<DailyReportPage />} />
+        <Route path="/messages" element={<MessagesPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {/* 悬浮黑猫医生（全站可见） */}

@@ -85,13 +85,13 @@ export default function BlackCatDoctor() {
               问询猫宁医生
               <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 rotate-45 bg-white shadow-[2px_-2px_2px_-2px_rgba(0,0,0,0.08)]" />
             </motion.span>
-            {/* 圆头像（真实医生图，object-cover 防裁切出现"两只猫"错觉） */}
-            <span className="relative h-14 w-14 rounded-full bg-brand-100 shadow-float ring-2 ring-white grid place-items-center overflow-hidden">
+            {/* 圆头像（真实医生图，去掉背景圆避免看起来像两张猫叠在一起，整体放大） */}
+            <span className="relative h-[68px] w-[68px] rounded-full bg-white shadow-float ring-2 ring-white grid place-items-center overflow-hidden">
               <PetAvatar
                 src={CATS.doctorGreeting}
                 alt="猫宁医生"
                 className="h-full w-full"
-                imgClassName="object-cover"
+                imgClassName="object-cover object-top"
               />
               {/* 绿色"在线"小圆点，放在右下角避开猫脸 */}
               <span className="absolute right-0.5 bottom-0.5 h-3 w-3 rounded-full bg-ok ring-2 ring-white" />
