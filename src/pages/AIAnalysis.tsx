@@ -80,7 +80,16 @@ export default function AIAnalysisPage() {
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
       <div className="flex items-center justify-between">
         <div className="w-9" />
-        <div className="text-base font-semibold">AI 照片分析</div>
+        <div className="flex items-center gap-1.5">
+          {/* 标题左侧装饰：黑猫头（已抠白底为透明 PNG，自动融入页面米色背景） */}
+          <img
+            src={CATS.decoAiTitleBlack}
+            alt=""
+            aria-hidden
+            className="h-8 w-8 object-contain select-none pointer-events-none"
+          />
+          <div className="text-base font-semibold">AI 照片分析</div>
+        </div>
         <button className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center text-ink-500">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="18" cy="12" r="1.5" fill="currentColor"/></svg>
         </button>
