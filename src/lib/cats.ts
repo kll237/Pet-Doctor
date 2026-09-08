@@ -34,11 +34,11 @@ export const CATS = {
   decoBottomDoctor: '/cats/deco-bottom-doctor.jpg',   // 底部功能猫医生（圆形背景）
   decoBottomBlack: '/cats/deco-bottom-black.png',     // 页面底部小黑猫（戴蓝领结趴着，已抠白底为透明 PNG）
   decoAiTitleBlack: '/cats/deco-ai-title.png',        // AI 照片分析页标题左侧黑猫头（已抠白底为透明 PNG）
-  decoCatSleeping: '/cats/deco-cat-sleeping.mp4',     // 睡觉小球内部：黑猫戴蓝领结蜷在玻璃球里睡觉的循环视频（720x720, 4s, 用户提供）
-  decoCatStretch: '/cats/deco-cat-stretch.mp4',       // 单击大猫动作3：伸懒腰（960x720, 4s, 用户提供）
-  decoCatEat: '/cats/deco-cat-eat.mp4',               // 单击大猫动作4：吃饭舔粮（960x720, 4s, 用户提供）
-  decoCatRun: '/cats/deco-cat-run.mp4',               // 单击大猫动作5：跑动跳跃（720x720, 4s, 用户提供）
-  decoCatLove: '/cats/deco-cat-love.mp4',             // 单击大猫动作6：闭眼冒爱心（720x720, 4s, 用户提供）
+  decoCatSleeping: '/cats/deco-cat-sleeping-b.mp4',   // 睡觉小球内部：黑猫戴蓝领结蜷在玻璃球里睡觉（背景已替换为 cream-50，与页面融合）
+  decoCatStretch: '/cats/deco-cat-stretch-b.mp4',     // 单击大猫动作3：伸懒腰（背景已替换为 cream-50，与页面融合）
+  decoCatEat: '/cats/deco-cat-eat-b.mp4',             // 单击大猫动作4：吃饭舔粮（背景已替换为 cream-50）
+  decoCatRun: '/cats/deco-cat-run-b.mp4',             // 单击大猫动作5：跑动跳跃（背景已替换为 cream-50）
+  decoCatLove: '/cats/deco-cat-love-b.mp4',           // 单击大猫动作6：闭眼冒爱心（背景已替换为 cream-50）
 } as const
 
 /**

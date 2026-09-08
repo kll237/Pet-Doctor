@@ -166,17 +166,21 @@ export default function BottomCat() {
               ) : (
                 <motion.div
                   key={`v-${action}`}
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                  className="absolute inset-0 grid place-items-center bg-cream-50"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="absolute inset-0 flex items-end justify-center overflow-hidden bg-cream-50"
                 >
-                  {/* 动作视频：真实用户提供的 4 种动作，单次播放后回到趴着。
-                      autoPlay + muted + playsInline 保证移动端自动静音播放。
-                      显式 w-[180px] h-[110px] 强制 video 元素盒为 180x110（不被视频本身 4:3/1:1
-                      宽高比撑大，确保与"原大猫框"完全重合），
-                      object-contain 在盒内按比例展示视频帧，letterbox 由父级 bg-cream-50 填充。 */}
+                  {/* 动作视频：处理后的视频已经把猫紧贴到画面里（带少量留白）、
+                      并把背景替换为 cream-50、画面宽度统一为 180px。
+                      这里用 w-[180px] h-auto 让视频保持原始比例，
+                      父级 flex items-end 把视频底部对齐到盒子底部，
+                      再被外层 overflow-hidden 裁掉上方溢出的部分 —
+                      于是猫脚刚好落在 180x110 盒子的下沿（与趴着的 PNG 用
+                      object-bottom 后的位置完全一致），既不会"变小"，也不
+                      会被"放大到只看到脸"（object-cover 会那样），猫身
+                      体和背景 cream-50 也与页面无缝融合。 */}
                   <video
                     src={CAT_ACTION_VIDEOS[action]}
                     autoPlay
@@ -184,7 +188,7 @@ export default function BottomCat() {
                     playsInline
                     preload="auto"
                     onEnded={onActionEnded}
-                    className="h-[110px] w-[180px] object-contain select-none"
+                    className="w-[180px] h-auto object-bottom select-none pointer-events-none"
                   />
                 </motion.div>
               )}
