@@ -72,7 +72,7 @@ export default function BlackCatDoctor() {
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0 }}
             onClick={toggleDoctor}
-            className="abs bottom-[104px] right-3 z-50 flex items-end gap-1"
+            className="abs bottom-[190px] right-3 z-50 flex items-end gap-1"
             aria-label="宠物医生"
           >
             {/* 标签（带小三角尾巴） */}
