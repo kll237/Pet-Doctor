@@ -16,12 +16,19 @@ type CatState = 'lying' | 'sleeping' | 'hidden'
 // 4 个动作的池子，单击时从这里随机抽一个
 const ACTION_POOL: CatAction[] = ['stretch', 'eat', 'run', 'love']
 
+// 每个动作视频的实际时长（4s × 24fps ≈ 97 帧 → 4.05s）
+// 由于底层格式是 Animated WebP（不是 video），浏览器不会触发 onEnded，
+// 所以用一个 setTimeout 兜底：到了这个时间就强制回到趴着状态。
+const ACTION_DURATION_MS = 4100
+
 export default function BottomCat() {
   const [state, setState] = useState<CatState>('lying')
   // 当前正在播放的动作（null=空闲呼吸）
   const [action, setAction] = useState<CatAction | null>(null)
   // 长按定时器
   const longPressTimer = useRef<number | null>(null)
+  // 动作视频回到趴着的定时器（Animated WebP 没 onEnded）
+  const actionEndTimer = useRef<number | null>(null)
   // 拖动小球
   const dragRef = useRef({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 })
   const [ballPos, setBallPos] = useState({ x: 0, y: 0 })
@@ -35,7 +42,18 @@ export default function BottomCat() {
     }
   }, [])
 
-  useEffect(() => () => clearLongPress(), [clearLongPress])
+  // 取消"动作回到趴着"的定时器（点击新动作 / 切到小球等场景）
+  const clearActionEnd = useCallback(() => {
+    if (actionEndTimer.current) {
+      window.clearTimeout(actionEndTimer.current)
+      actionEndTimer.current = null
+    }
+  }, [])
+
+  useEffect(() => () => {
+    clearLongPress()
+    clearActionEnd()
+  }, [clearLongPress, clearActionEnd])
 
   // === 大猫（lying）交互 ===
   const onCatPointerDown = () => {
@@ -53,17 +71,18 @@ export default function BottomCat() {
 
   const onCatClick = (e: React.MouseEvent) => {
     if (state !== 'lying') return
-    // 正在播放动作时点击忽略，等视频播完才能点
+    // 正在播放动作时点击忽略，等动画结束才能点
     if (action !== null) return
     // 每次单击：随机选一个动作视频
     const next = ACTION_POOL[Math.floor(Math.random() * ACTION_POOL.length)]
     setAction(next)
+    clearActionEnd()
+    // Animated WebP 没有 onEnded，用 setTimeout 兜底回到趴着
+    actionEndTimer.current = window.setTimeout(() => {
+      setAction(null)
+      actionEndTimer.current = null
+    }, ACTION_DURATION_MS)
   }
-
-  // 动作视频播放完毕 → 回到趴着
-  const onActionEnded = useCallback(() => {
-    setAction(null)
-  }, [])
 
   // === 小球（sleeping）交互 ===
   const onBallPointerDown = (e: React.PointerEvent) => {
@@ -165,29 +184,27 @@ export default function BottomCat() {
                 </motion.div>
               ) : (
                 <motion.div
-                  key={`v-${action}`}
+                  key={`w-${action}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  className="absolute inset-0 flex items-end justify-center overflow-hidden bg-cream-50"
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute inset-0 flex items-end justify-center overflow-hidden"
                 >
-                  {/* 动作视频：处理后的视频已经把猫紧贴到画面里（带少量留白）、
-                      并把背景替换为 cream-50、画面宽度统一为 180px。
-                      这里用 w-[180px] h-auto 让视频保持原始比例，
-                      父级 flex items-end 把视频底部对齐到盒子底部，
-                      再被外层 overflow-hidden 裁掉上方溢出的部分 —
-                      于是猫脚刚好落在 180x110 盒子的下沿（与趴着的 PNG 用
-                      object-bottom 后的位置完全一致），既不会"变小"，也不
-                      会被"放大到只看到脸"（object-cover 会那样），猫身
-                      体和背景 cream-50 也与页面无缝融合。 */}
-                  <video
+                  {/* 动作动画：使用 Animated WebP（带 alpha 透明背景）。
+                      没有 <video> 也没有任何背景色容器 → 整个 div 完全是透明，
+                      只有猫自身的像素不透明，所以渲染出来的就是"贴在页面
+                      背景上的猫剪影"，没有任何矩形框/背景色块。
+                      pointer-events-none 让点击穿过猫图本身，只点击到外层 wrapper
+                      的矩形热区（触发单击交互）。 */}
+                  <motion.img
                     src={CAT_ACTION_VIDEOS[action]}
-                    autoPlay
-                    muted
-                    playsInline
-                    preload="auto"
-                    onEnded={onActionEnded}
+                    alt=""
+                    draggable={false}
+                    initial={{ scale: 0.92 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0.92 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                     className="w-[180px] h-auto object-bottom select-none pointer-events-none"
                   />
                 </motion.div>
