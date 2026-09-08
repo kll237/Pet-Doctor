@@ -121,18 +121,18 @@ export default function BottomCat() {
   return (
     <>
       {/* === 大猫（lying） + 动作视频（action） ===
-          容器 180x180 居中放在 bottom-[64px]，比原来的 180x110 高 70px，
-          用来容纳更大的动作视频（4:3 / 1:1 都能完整显示）。
-          趴着时用 object-contain object-bottom 让猫保持贴底；动作视频 object-contain 居中。 */}
+          严格保持原始尺寸 180x110 居中放在 bottom-[64px]（不被视频动画撑大）。
+          趴着的猫用透明 PNG，动作视频背景是暖米色（RGB≈220-240）与页面 cream-50 同色系，
+          视频容器 bg-cream-50 + object-contain 居中，四周留白也能无缝融入页面背景。 */}
       <AnimatePresence>
         {state === 'lying' && (
           <motion.div
             key="lying"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.4, transition: { duration: 0.25 } }}
+            initial={{ opacity: 0, y: 20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.4, x: '-50%', transition: { duration: 0.25 } }}
             transition={{ type: 'spring', damping: 18, stiffness: 220 }}
-            className="absolute left-1/2 -translate-x-1/2 bottom-[64px] w-[180px] h-[180px] z-20 cursor-pointer"
+            className="absolute left-1/2 bottom-[64px] w-[180px] h-[110px] z-20 cursor-pointer overflow-hidden"
             onClick={onCatClick}
             onPointerDown={onCatPointerDown}
             onPointerUp={onCatPointerUp}
@@ -170,10 +170,13 @@ export default function BottomCat() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.7 }}
                   transition={{ duration: 0.25, ease: 'easeOut' }}
-                  className="h-full w-full grid place-items-center"
+                  className="absolute inset-0 grid place-items-center bg-cream-50"
                 >
                   {/* 动作视频：真实用户提供的 4 种动作，单次播放后回到趴着。
-                      autoPlay + muted + playsInline 保证移动端自动静音播放。 */}
+                      autoPlay + muted + playsInline 保证移动端自动静音播放。
+                      显式 w-[180px] h-[110px] 强制 video 元素盒为 180x110（不被视频本身 4:3/1:1
+                      宽高比撑大，确保与"原大猫框"完全重合），
+                      object-contain 在盒内按比例展示视频帧，letterbox 由父级 bg-cream-50 填充。 */}
                   <video
                     src={CAT_ACTION_VIDEOS[action]}
                     autoPlay
@@ -181,7 +184,7 @@ export default function BottomCat() {
                     playsInline
                     preload="auto"
                     onEnded={onActionEnded}
-                    className="max-h-full max-w-full object-contain select-none"
+                    className="h-[110px] w-[180px] object-contain select-none"
                   />
                 </motion.div>
               )}
@@ -195,13 +198,16 @@ export default function BottomCat() {
           位置 bottom-[64px] 与大猫底边对齐（球更高，所以视觉中心会稍往上移，看起来更"飘"）。 */}
       <AnimatePresence>
         {state === 'sleeping' && (
-          <motion.div
+          <div
             key="ball"
+            className="absolute left-1/2 -translate-x-1/2 bottom-[64px] h-24 w-24 z-30"
+          >
+          <motion.div
             initial={{ scale: 0.3, opacity: 0 }}
             animate={{ scale: 1, opacity: 1, x: ballPos.x, y: ballPos.y }}
             exit={{ x: 160, y: 200, scale: 0.2, opacity: 0, transition: { duration: 0.4 } }}
             transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-            className="absolute left-1/2 -translate-x-1/2 bottom-[64px] h-24 w-24 rounded-full bg-cream-100 shadow-float ring-2 ring-cream-200 overflow-hidden cursor-grab active:cursor-grabbing select-none z-30 touch-none"
+            className="relative h-full w-full rounded-full bg-cream-100 shadow-float ring-2 ring-cream-200 overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
             onPointerDown={onBallPointerDown}
             onPointerMove={onBallPointerMove}
             onPointerUp={onBallPointerUp}
@@ -237,6 +243,7 @@ export default function BottomCat() {
               💤
             </motion.span>
           </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
