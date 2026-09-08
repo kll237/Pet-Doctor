@@ -35,7 +35,24 @@ export const CATS = {
   decoBottomBlack: '/cats/deco-bottom-black.png',     // 页面底部小黑猫（戴蓝领结趴着，已抠白底为透明 PNG）
   decoAiTitleBlack: '/cats/deco-ai-title.png',        // AI 照片分析页标题左侧黑猫头（已抠白底为透明 PNG）
   decoCatSleeping: '/cats/deco-cat-sleeping.mp4',     // 睡觉小球内部：黑猫戴蓝领结蜷在玻璃球里睡觉的循环视频（720x720, 4s, 用户提供）
+  decoCatStretch: '/cats/deco-cat-stretch.mp4',       // 单击大猫动作3：伸懒腰（960x720, 4s, 用户提供）
+  decoCatEat: '/cats/deco-cat-eat.mp4',               // 单击大猫动作4：吃饭舔粮（960x720, 4s, 用户提供）
+  decoCatRun: '/cats/deco-cat-run.mp4',               // 单击大猫动作5：跑动跳跃（720x720, 4s, 用户提供）
+  decoCatLove: '/cats/deco-cat-love.mp4',             // 单击大猫动作6：闭眼冒爱心（720x720, 4s, 用户提供）
 } as const
+
+/**
+ * 底部吉祥物的"单击动作"视频池。key 与上面的 decoCat* 字段名去掉前缀保持一致。
+ * 单击大猫时从这个池里随机抽一个播放，播完回到趴着状态。
+ */
+export const CAT_ACTION_VIDEOS = {
+  stretch: CATS.decoCatStretch,
+  eat: CATS.decoCatEat,
+  run: CATS.decoCatRun,
+  love: CATS.decoCatLove,
+} as const
+
+export type CatAction = keyof typeof CAT_ACTION_VIDEOS
 
 /** 一只通用猫图：用于用户上传占位、记录缩略图等 */
 export const DEFAULT_CAT_THUMB = CATS.puddingSideFace
