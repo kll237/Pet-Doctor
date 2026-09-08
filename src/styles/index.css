@@ -25,16 +25,13 @@
 }
 
 @layer components {
-  /* 手机壳：桌面端把页面居中到手机尺寸 */
+  /* 手机壳：桌面端固定 390x844 模拟 iPhone 尺寸并居中，移动端全屏。
+     所有页面大小一致（标准 mobile app 行为），nav 和底部装饰永远在固定位置 */
   .phone-shell {
-    @apply relative mx-auto h-full max-w-[420px] overflow-hidden bg-cream-50
-           shadow-[0_30px_80px_-20px_rgba(60,50,30,0.18)]
-           rounded-[2.2rem];
-  }
-  @media (max-width: 640px) {
-    .phone-shell {
-      @apply max-w-full rounded-none shadow-none;
-    }
+    @apply relative mx-auto w-full h-screen overflow-hidden bg-cream-50
+           sm:h-[844px] sm:w-[390px] sm:max-w-[390px]
+           sm:shadow-[0_30px_80px_-20px_rgba(60,50,30,0.18)]
+           sm:rounded-[2.2rem];
   }
 
   .card {

@@ -12,7 +12,7 @@ import { CATS } from '@/lib/cats'
  */
 export default function Layout({ children }: PropsWithChildren) {
   return (
-    <div className="min-h-screen w-full bg-[#ECE6DC] flex items-stretch justify-center py-0 sm:py-6">
+    <div className="min-h-screen w-full bg-[#ECE6DC] flex items-center justify-center py-0 sm:py-6">
       <div className="phone-shell relative">
         {/* 宠物切换条（全局，随时切换查看对应宠物） */}
         <PetSwitcher />
