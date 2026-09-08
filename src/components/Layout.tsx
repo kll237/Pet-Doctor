@@ -19,8 +19,9 @@ export default function Layout({ children }: PropsWithChildren) {
         <div className="relative h-[calc(100%-48px)] flex flex-col">
           <div className="flex-1 overflow-y-auto scrollbar-hide">{children}</div>
           <BottomNav />
-          {/* 底部装饰：戴蓝领结小黑猫，爪子贴在手机壳最底端，居中放大。透明 PNG + pointer-events-none */}
-          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[240px] h-[180px] z-10">
+          {/* 底部装饰：戴蓝领结小黑猫，趴在下边栏上。透明 PNG + pointer-events-none。
+              尺寸 320x200 与裁切后的 800x504 原图高宽比一致；z-20 高于 BottomNav，猫爪压住 nav 顶边 */}
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 w-[320px] h-[200px] z-20">
             <PetAvatar
               src={CATS.decoBottomBlack}
               alt="小黑猫"
