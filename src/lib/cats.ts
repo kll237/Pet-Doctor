@@ -32,7 +32,7 @@ export const CATS = {
   decoAiBlack: '/cats/deco-ai.jpg',                   // AI 分析页小黑猫
   decoChatBlack: '/cats/deco-chat.jpg',               // 对话页小黑猫（带绿盾）
   decoBottomDoctor: '/cats/deco-bottom-doctor.jpg',   // 底部功能猫医生（圆形背景）
-  decoBottomBlack: '/cats/deco-bottom-black.jpg',     // 页面底部小黑猫（戴蓝领结趴着，与背景 mix-blend 融合）
+  decoBottomBlack: '/cats/deco-bottom-black.png',     // 页面底部小黑猫（戴蓝领结趴着，已抠白底为透明 PNG）
 } as const
 
 /** 一只通用猫图：用于用户上传占位、记录缩略图等 */

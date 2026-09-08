@@ -20,6 +20,16 @@ screenshots/
 *-dom.html
 screenshot_verify.mjs
 screenshot_home.mjs
+screenshot_log.mjs
+screenshot_cats.mjs
+
+# python cutout helpers (throwaway)
+remove_white_bg*.py
+
+# vite log/error temp files (locked while server runs)
+vite.log
+vite.err
+*.err
 
 # stale build rename (vite build workaround)
 dist_bak/
