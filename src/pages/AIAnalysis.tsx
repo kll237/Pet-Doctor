@@ -80,23 +80,23 @@ export default function AIAnalysisPage() {
     <div className="px-4 pt-2 pb-24 bg-cream-50 min-h-full">
       <div className="flex items-center justify-between">
         <div className="w-9" />
-        <div className="flex items-center gap-1.5">
-          {/* 标题左侧装饰：黑猫头（已抠白底为透明 PNG，自动融入页面米色背景） */}
-          <img
-            src={CATS.decoAiTitleBlack}
-            alt=""
-            aria-hidden
-            className="h-8 w-8 object-contain select-none pointer-events-none"
-          />
-          <div className="text-base font-semibold">AI 照片分析</div>
-        </div>
+        <div className="text-base font-semibold">AI 照片分析</div>
         <button className="h-9 w-9 rounded-full bg-white shadow-card grid place-items-center text-ink-500">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="18" cy="12" r="1.5" fill="currentColor"/></svg>
         </button>
       </div>
 
       {/* 上传/拍照分析（白底卡 + 大圆形相机 + 左右样图） */}
-      <div className="mt-3 rounded-3xl bg-white shadow-card px-5 py-5 text-center">
+      <div className="relative mt-3">
+        {/* 黑猫头趴在白框上方：身子在白框外的页面背景区，爪子搭在白框顶边。
+            透明 PNG 自动融入米色背景，不遮挡白框内文字 */}
+        <img
+          src={CATS.decoAiTitleBlack}
+          alt=""
+          aria-hidden
+          className="absolute -top-[64px] left-5 h-24 w-24 object-contain z-20 select-none pointer-events-none"
+        />
+        <div className="rounded-3xl bg-white shadow-card px-5 py-5 text-center">
         <div className="text-sm font-semibold">上传/拍照分析 · 当前部位：<span className="text-brand-500">{selectedPart}</span></div>
         <div className="mt-1 text-[11px] text-ink-400">选择要分析的部位后，点击相机上传{pet.name}的照片</div>
 
@@ -127,6 +127,7 @@ export default function AIAnalysisPage() {
         <button onClick={triggersSimulate} className="mt-3 rounded-2xl bg-cream-100 px-3 py-1.5 text-xs text-ink-700">
           ▶ 运行 AI 模拟分析
         </button>
+        </div>
       </div>
 
       {/* 可分析部位（3×2） */}
