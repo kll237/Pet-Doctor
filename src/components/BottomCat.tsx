@@ -22,18 +22,24 @@ const ACTION_POOL: CatAction[] = ['stretch', 'eat', 'run', 'love']
 const ACTION_DURATION_MS = 4100
 
 // 鼠标悬停时浮现的浮动文字提示气泡（桌面端 hover 触发；移动端无 hover，仍可直接点击）
+// placement: 'top' = 居中在猫头顶上方；'left' = 贴在猫左侧（避开右下角的猫宁医生按钮）
 function HintBubble({
   show,
   text,
-  bottom = 'bottom-[196px]',
+  bottom,
   align = 'center',
+  placement = 'top',
 }: {
   show: boolean
   text: string
   bottom?: string
   align?: 'center' | 'left'
+  placement?: 'top' | 'left'
 }) {
-  const alignCls = align === 'left' ? 'left-3 translate-x-0' : 'left-1/2 -translate-x-1/2'
+  const posCls =
+    placement === 'left'
+      ? 'left-3 bottom-[150px]'
+      : `${align === 'left' ? 'left-3 translate-x-0' : 'left-1/2 -translate-x-1/2'} ${bottom ?? 'bottom-[196px]'}`
   return (
     <AnimatePresence>
       {show && (
@@ -42,7 +48,7 @@ function HintBubble({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           transition={{ duration: 0.18, ease: 'easeOut' }}
-          className={`pointer-events-none absolute ${alignCls} ${bottom} z-40`}
+          className={`pointer-events-none absolute ${posCls} z-40`}
         >
           <div className="relative whitespace-nowrap rounded-xl bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-float ring-1 ring-black/5">
             {text}
@@ -364,9 +370,9 @@ export default function BottomCat() {
       {/* === 悬停文字提示气泡（桌面端鼠标放上来时显示）===
           放在各交互体之外、pointer-events-none 不拦截点击；
           大猫/小球互斥显示，召回按钮在左下角单独对齐。 */}
-      <HintBubble show={catHover && state === 'lying'} text="点一下和我玩 🐾 · 长按让我去睡觉" />
-      <HintBubble show={ballHover && state === 'sleeping'} text="拖动我 · 双击变回大猫 · 长按让我离开" />
-      <HintBubble show={recallHover && state === 'hidden'} text="把我召唤回来 🐾" align="left" bottom="bottom-[250px]" />
+      <HintBubble show={catHover && state === 'lying'} text="点我玩 🐾 · 长按睡觉" placement="left" />
+      <HintBubble show={ballHover && state === 'sleeping'} text="拖动 · 双击回大猫 · 长按离开" placement="left" />
+      <HintBubble show={recallHover && state === 'hidden'} text="召唤小猫 🐾" align="left" bottom="bottom-[250px]" />
     </>
   )
 }
