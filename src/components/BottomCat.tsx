@@ -202,6 +202,43 @@ export default function BottomCat() {
         )}
       </AnimatePresence>
 
+      {/* === 爱心 overlay（仅 love 动作）===
+          纯 DOM 层叠加在猫头顶：当 action==='love' 时，从猫头顶向上飘出循环爱心。
+          不改动任何 WebP 资源、不触碰 stretch/eat/run 三个动画；
+          即使浏览器缓存了旧的（无爱心）love.webp，也能立刻看到爱心。
+          叠加层放在大猫 wrapper 之外（不被其 overflow-hidden 裁剪），pointer-events-none 不拦截点击。 */}
+      {action === 'love' && (
+        <div className="pointer-events-none absolute left-1/2 bottom-[64px] z-30 h-[110px] w-[180px] -translate-x-1/2">
+          {[0, 0.7, 1.4].map((delay, idx) => (
+            <motion.div
+              key={idx}
+              className={`absolute top-1 -translate-x-1/2 ${
+                idx === 1 ? 'left-[44%]' : idx === 2 ? 'left-[56%]' : 'left-1/2'
+              }`}
+              initial={{ opacity: 0, y: 6, scale: 0.5 }}
+              animate={{
+                opacity: [0, 1, 1, 0],
+                y: [6, -14, -30, -46],
+                scale: [0.5, 1, 1, 0.85],
+              }}
+              transition={{ duration: 2.1, repeat: Infinity, delay, ease: 'easeOut' }}
+            >
+              <svg
+                viewBox="0 0 32 29.6"
+                className="h-5 w-5"
+                style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.15))' }}
+                aria-hidden
+              >
+                <path
+                  d="M23.6,0c-2.6,0-4.9,1.3-6.4,3.3C15.7,1.3,13.4,0,10.8,0C4.8,0,0,4.8,0,10.8c0,7.5,8.3,13.3,16,18.8 c7.7-5.5,16-11.3,16-18.8C32,4.8,27.2,0,23.6,0z"
+                  fill="#FF5C8A"
+                />
+              </svg>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
       {/* === 小球（sleeping，可拖动）===
           尺寸 72 → 96（h-24 w-24），让玻璃球里睡觉的猫更清晰、能看到呼吸缩放。
           位置 bottom-[64px] 与大猫底边对齐（球更高，所以视觉中心会稍往上移，看起来更"飘"）。 */}
