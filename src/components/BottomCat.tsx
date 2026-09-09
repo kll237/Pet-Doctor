@@ -55,6 +55,17 @@ export default function BottomCat() {
     clearActionEnd()
   }, [clearLongPress, clearActionEnd])
 
+  // 预解码 4 段动作 WebP：避免单击时主线程现解大图（Animated WebP 是 CPU 解码，
+  // 540×340/96 帧约 2~2.5MB，现加载会卡一下）。提前 new Image + decode() 让浏览器
+  // 在空闲时把首帧和后续解码缓存好，点击直接播放，消除"卡顿"。
+  useEffect(() => {
+    ACTION_POOL.forEach((a) => {
+      const img = new window.Image()
+      img.src = CAT_ACTION_VIDEOS[a]
+      if (typeof img.decode === 'function') img.decode().catch(() => {})
+    })
+  }, [])
+
   // === 大猫（lying）交互 ===
   const onCatPointerDown = () => {
     if (state !== 'lying') return
@@ -158,58 +169,35 @@ export default function BottomCat() {
             onPointerCancel={onCatPointerCancel}
             title="点一下和小猫互动 · 长按让它去睡觉"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              {action === null ? (
+            {action === null ? (
+              <div className="h-full w-full">
+                {/* 趴着的猫：轻微呼吸 */}
                 <motion.div
-                  key="img"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="h-full w-full"
+                  className="h-full w-full origin-bottom"
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ y: { duration: 2.6, repeat: Infinity, ease: 'easeInOut' as const } }}
                 >
-                  {/* 趴着的猫：轻微呼吸 */}
-                  <motion.div
-                    className="h-full w-full origin-bottom"
-                    animate={{ y: [0, -2, 0] }}
-                    transition={{ y: { duration: 2.6, repeat: Infinity, ease: 'easeInOut' as const } }}
-                  >
-                    <PetAvatar
-                      src={CATS.decoBottomBlack}
-                      alt="小黑猫"
-                      className="h-full w-full"
-                      imgClassName="object-contain object-bottom"
-                    />
-                  </motion.div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key={`w-${action}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                  className="absolute inset-0 flex items-end justify-center overflow-hidden"
-                >
-                  {/* 动作动画：使用 Animated WebP（带 alpha 透明背景）。
-                      没有 <video> 也没有任何背景色容器 → 整个 div 完全是透明，
-                      只有猫自身的像素不透明，所以渲染出来的就是"贴在页面
-                      背景上的猫剪影"，没有任何矩形框/背景色块。
-                      pointer-events-none 让点击穿过猫图本身，只点击到外层 wrapper
-                      的矩形热区（触发单击交互）。 */}
-                  <motion.img
-                    src={CAT_ACTION_VIDEOS[action]}
-                    alt=""
-                    draggable={false}
-                    initial={{ scale: 0.92 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0.92 }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="w-[180px] h-auto object-bottom select-none pointer-events-none"
+                  <PetAvatar
+                    src={CATS.decoBottomBlack}
+                    alt="小黑猫"
+                    className="h-full w-full"
+                    imgClassName="object-contain object-bottom"
                   />
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-end justify-center overflow-hidden">
+                {/* 动作动画：Animated WebP（alpha 透明背景）。无背景容器 → 直接贴在页面背景上的猫剪影。
+                    pointer-events-none 让点击穿过猫图，只命中外层 wrapper 热区。
+                    直接挂载、不做透明度/缩放过渡 → 单击即播、无"闪一下"。 */}
+                <img
+                  src={CAT_ACTION_VIDEOS[action]}
+                  alt=""
+                  draggable={false}
+                  className="w-[180px] h-auto object-bottom select-none pointer-events-none"
+                />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
