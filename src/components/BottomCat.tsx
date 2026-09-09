@@ -21,6 +21,39 @@ const ACTION_POOL: CatAction[] = ['stretch', 'eat', 'run', 'love']
 // 所以用一个 setTimeout 兜底：到了这个时间就强制回到趴着状态。
 const ACTION_DURATION_MS = 4100
 
+// 鼠标悬停时浮现的浮动文字提示气泡（桌面端 hover 触发；移动端无 hover，仍可直接点击）
+function HintBubble({
+  show,
+  text,
+  bottom = 'bottom-[196px]',
+  align = 'center',
+}: {
+  show: boolean
+  text: string
+  bottom?: string
+  align?: 'center' | 'left'
+}) {
+  const alignCls = align === 'left' ? 'left-3 translate-x-0' : 'left-1/2 -translate-x-1/2'
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className={`pointer-events-none absolute ${alignCls} ${bottom} z-40`}
+        >
+          <div className="relative whitespace-nowrap rounded-xl bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-float ring-1 ring-black/5">
+            {text}
+            <span className="absolute left-1/2 top-full -mt-px -translate-x-1/2 border-[5px] border-transparent border-t-white" />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 export default function BottomCat() {
   const [state, setState] = useState<CatState>('lying')
   // 当前正在播放的动作（null=空闲呼吸）
@@ -32,6 +65,10 @@ export default function BottomCat() {
   // 拖动小球
   const dragRef = useRef({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 })
   const [ballPos, setBallPos] = useState({ x: 0, y: 0 })
+  // 悬停提示气泡状态
+  const [catHover, setCatHover] = useState(false)
+  const [ballHover, setBallHover] = useState(false)
+  const [recallHover, setRecallHover] = useState(false)
   // 双击检测（移动端需要手动实现）
   const lastTapRef = useRef(0)
 
@@ -167,6 +204,8 @@ export default function BottomCat() {
             onPointerDown={onCatPointerDown}
             onPointerUp={onCatPointerUp}
             onPointerCancel={onCatPointerCancel}
+            onMouseEnter={() => setCatHover(true)}
+            onMouseLeave={() => setCatHover(false)}
             title="点一下和小猫互动 · 长按让它去睡觉"
           >
             {action === null ? (
@@ -255,6 +294,8 @@ export default function BottomCat() {
             transition={{ type: 'spring', damping: 22, stiffness: 280 }}
             className="relative h-full w-full rounded-full bg-cream-100 shadow-float ring-2 ring-cream-200 overflow-hidden cursor-grab active:cursor-grabbing select-none touch-none"
             onPointerDown={onBallPointerDown}
+            onMouseEnter={() => setBallHover(true)}
+            onMouseLeave={() => setBallHover(false)}
             onPointerMove={onBallPointerMove}
             onPointerUp={onBallPointerUp}
             onPointerCancel={onBallPointerCancel}
@@ -307,6 +348,8 @@ export default function BottomCat() {
             className="absolute bottom-[190px] left-3 z-50 h-12 w-12 rounded-full bg-white shadow-float ring-2 ring-cream-100 grid place-items-center active:scale-90 transition-transform"
             aria-label="召回小猫"
             title="召回小猫"
+            onMouseEnter={() => setRecallHover(true)}
+            onMouseLeave={() => setRecallHover(false)}
           >
             <span className="text-2xl leading-none">🐾</span>
             <motion.span
@@ -317,6 +360,13 @@ export default function BottomCat() {
           </motion.button>
         )}
       </AnimatePresence>
+
+      {/* === 悬停文字提示气泡（桌面端鼠标放上来时显示）===
+          放在各交互体之外、pointer-events-none 不拦截点击；
+          大猫/小球互斥显示，召回按钮在左下角单独对齐。 */}
+      <HintBubble show={catHover && state === 'lying'} text="点一下和我玩 🐾 · 长按让我去睡觉" />
+      <HintBubble show={ballHover && state === 'sleeping'} text="拖动我 · 双击变回大猫 · 长按让我离开" />
+      <HintBubble show={recallHover && state === 'hidden'} text="把我召唤回来 🐾" align="left" bottom="bottom-[250px]" />
     </>
   )
 }
