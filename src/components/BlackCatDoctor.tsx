@@ -17,7 +17,7 @@ import { PetAvatar } from '@/components/PetAvatar'
  * - 对话末尾根据上下文插入"行动建议"卡：记录到今日日志 / 需要就医建议 / 预约复查提醒
  */
 export default function BlackCatDoctor() {
-  const { doctorOpen, setDoctorOpen, toggleDoctor } = useUIStore()
+  const { doctorOpen, setDoctorOpen, toggleDoctor, doctorPos, setDoctorPos } = useUIStore()
   const currentId = usePetStore((s) => s.currentId)
   const pet = useCurrentPet()
   const messages = useChatStore((s) => s.byPet[currentId] ?? [])
@@ -27,6 +27,45 @@ export default function BlackCatDoctor() {
   const [toast, setToast] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const nav = useNavigate()
+
+  // ===== 悬浮按钮拖动（可移到屏幕任意位置，松手记忆）=====
+  const SHELL_W = 390
+  const NAV_H = 48
+  const BTN = 72
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(doctorPos)
+  const dragRef = useRef({ sx: 0, sy: 0, bx: 0, by: 0, moved: false })
+  const onDragStart = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const shell = (e.currentTarget.closest('.phone-shell') as HTMLElement) ?? document.body
+    const sr = shell.getBoundingClientRect()
+    const r = e.currentTarget.getBoundingClientRect()
+    dragRef.current = { sx: e.clientX, sy: e.clientY, bx: r.left - sr.left, by: r.top - sr.top, moved: false }
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+  }
+  const onDragMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const d = dragRef.current
+    if (!d.sx) return
+    const dx = e.clientX - d.sx
+    const dy = e.clientY - d.sy
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true
+    let nx = d.bx + dx
+    let ny = d.by + dy
+    nx = Math.max(4, Math.min(nx, SHELL_W - BTN))
+    ny = Math.max(56, Math.min(ny, 844 - NAV_H - BTN))
+    setPos({ x: nx, y: ny })
+  }
+  const onDragEnd = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (pos) setDoctorPos(pos)
+  }
+  const onClickBtn = (e: React.MouseEvent) => {
+    // 拖动过则不触发点开浮窗
+    if (dragRef.current.moved) {
+      e.stopPropagation()
+      e.preventDefault()
+      dragRef.current.moved = false
+      return
+    }
+    toggleDoctor()
+  }
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
@@ -71,8 +110,12 @@ export default function BlackCatDoctor() {
             initial={{ scale: 0, rotate: -30 }}
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0 }}
-            onClick={toggleDoctor}
-            className="abs bottom-[190px] right-3 z-50 flex items-end gap-1"
+            onClick={onClickBtn}
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            className={`abs z-50 flex items-end gap-1 touch-none select-none ${pos ? '' : 'right-3 bottom-[190px]'}`}
+            style={pos ? { left: pos.x, top: pos.y } : undefined}
             aria-label="宠物医生"
           >
             {/* 标签（带小三角尾巴） */}

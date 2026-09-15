@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
+import { AnimatePresence, motion } from 'framer-motion'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { useLogStore } from '@/store/logStore'
 import { useMessagesStore } from '@/store/messagesStore'
+import { useWeatherStore, CN_CITIES, describeWeather } from '@/store/weatherStore'
 import { CATS } from '@/lib/cats'
 import { PetAvatar } from '@/components/PetAvatar'
 
@@ -44,6 +47,29 @@ export default function HomePage() {
   const riskDesc = !todayLog ? '继续保持当前的健康状态' : todayLog.summary.description
 
   const unread = useMessagesStore((s) => s.messages.filter((m) => !m.read).length)
+
+  // 真实天气：进入页面自动拉取当前选中城市的实时温度
+  const { city, tempC, code, loading, error, selectCity, searchCity } = useWeatherStore()
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [kw, setKw] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [results, setResults] = useState<typeof CN_CITIES>([])
+
+  useEffect(() => {
+    if (tempC === null && !loading) void selectCity(city)
+  }, [])
+
+  const onSearch = async (v: string) => {
+    setKw(v)
+    if (!v.trim()) { setResults([]); return }
+    setSearching(true)
+    const r = await searchCity(v)
+    setResults(r)
+    setSearching(false)
+  }
+
+  const w = code != null ? describeWeather(code) : null
+  const tempText = loading ? '…' : tempC != null ? `${tempC}°C` : error ? '—' : '25°C'
 
   return (
     <div className="px-4 pt-2 pb-28 bg-cream-50 min-h-full">
@@ -109,10 +135,18 @@ export default function HomePage() {
               <div className="mt-0.5 text-xs text-ink-700">{todayLog?.summary.description ?? '状态良好，继续保持哦～'}</div>
             </div>
           </div>
-          {/* 天气放在最右上方（猫图覆盖前的位置） */}
-          <div className="absolute right-3 top-3 z-10 flex items-center gap-1 text-warn text-xs font-medium">
-            <SunIcon /> <span>{(todayLog?.weatherC ?? 25)}°C</span>
-          </div>
+          {/* 天气放在最右上方（猫图覆盖前的位置）——点击可切换地区 */}
+          <button
+            onClick={() => setPickerOpen(true)}
+            className="absolute right-3 top-3 z-10 flex items-center gap-1 text-ink-700 text-xs font-medium bg-white/70 backdrop-blur rounded-full px-2 py-1 shadow-card active:scale-95 transition-transform"
+            aria-label="切换城市天气"
+          >
+            <span>{w?.icon ?? '🌡️'}</span>
+            <span className="font-semibold">{tempText}</span>
+            <span className="text-ink-400">·</span>
+            <span>{city.name}</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
         </div>
       </div>
 
@@ -165,6 +199,64 @@ export default function HomePage() {
           <div className="mt-0.5 text-[11px] text-ink-500 truncate">{riskDesc}</div>
         </div>
       </div>
+
+      {/* 城市天气选择浮层 */}
+      <AnimatePresence>
+        {pickerOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="abs inset-0 z-[60] bg-ink-900/40 grid place-items-end"
+            onClick={() => setPickerOpen(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
+              className="w-full bg-white rounded-t-3xl p-4 max-h-[85%] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-base font-semibold">选择城市</div>
+                <button onClick={() => setPickerOpen(false)} className="text-ink-400 text-sm">关闭</button>
+              </div>
+              <input
+                value={kw}
+                onChange={(e) => onSearch(e.target.value)}
+                placeholder="搜索任意城市，如 上海 / Tokyo"
+                className="w-full rounded-2xl bg-cream-50 px-4 py-2.5 text-sm outline-none mb-3 placeholder:text-ink-400"
+              />
+              {searching && <div className="text-xs text-ink-400 mb-2">搜索中…</div>}
+              {results.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-[11px] text-ink-400 mb-1">搜索结果</div>
+                  <div className="flex flex-wrap gap-2">
+                    {results.map((c, i) => (
+                      <button
+                        key={`${c.name}-${i}`}
+                        onClick={async () => { await selectCity(c); setPickerOpen(false) }}
+                        className="rounded-2xl bg-brand-50 text-brand-700 px-3 py-1.5 text-xs active:scale-95 transition-transform"
+                      >
+                        {c.name}{c.adm ? ` · ${c.adm}` : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="text-[11px] text-ink-400 mb-1">常用城市</div>
+              <div className="flex flex-wrap gap-2">
+                {CN_CITIES.map((c) => (
+                  <button
+                    key={c.name}
+                    onClick={async () => { await selectCity(c); setPickerOpen(false) }}
+                    className={`rounded-2xl px-3 py-1.5 text-xs active:scale-95 transition-transform ${c.name === city.name ? 'bg-brand-500 text-white' : 'bg-cream-50 text-ink-700'}`}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
