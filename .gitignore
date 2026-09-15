@@ -36,3 +36,6 @@ dist_bak/
 
 # local dev-server launcher (keep locally, don't publish)
 _launch-vite.ps1
+
+# 社区后端运行时数据（本地多用户互通，含测试数据）
+server/data.json

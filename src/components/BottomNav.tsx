@@ -33,6 +33,13 @@ const tabs = [
       <path d="M4 21a8 8 0 0 1 16 0" stroke={active ? '#F4A12C' : '#9B8E7F'} strokeWidth="1.6" strokeLinecap="round" fill={active ? 'rgba(244,161,44,0.12)' : 'transparent'}/>
     </svg>
   ) },
+  { to: '/community', label: '社区', icon: (active: boolean) => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="9" cy="9" r="3.2" stroke={active ? '#F4A12C' : '#9B8E7F'} strokeWidth="1.6" fill={active ? 'rgba(244,161,44,0.12)' : 'transparent'}/>
+      <circle cx="16" cy="11" r="2.6" stroke={active ? '#F4A12C' : '#9B8E7F'} strokeWidth="1.6" fill={active ? 'rgba(244,161,44,0.12)' : 'transparent'}/>
+      <path d="M3 19a6 6 0 0 1 12 0M14 19a5 5 0 0 1 7 0" stroke={active ? '#F4A12C' : '#9B8E7F'} strokeWidth="1.6" strokeLinecap="round" fill={active ? 'rgba(244,161,44,0.12)' : 'transparent'}/>
+    </svg>
+  ) },
 ]
 
 export default function BottomNav() {
@@ -41,7 +48,7 @@ export default function BottomNav() {
   const activePath =
     loc.pathname === '/' || loc.pathname === '/summary' ? '/' : loc.pathname
   return (
-    <nav className="border-t border-cream-200 bg-white/95 backdrop-blur px-3 pt-1.5 pb-3 grid grid-cols-5 items-end">
+    <nav className="border-t border-cream-200 bg-white/95 backdrop-blur px-3 pt-1.5 pb-3 grid grid-cols-6 items-end">
       {tabs.map((t) => {
         const active = activePath === t.to
         return (
