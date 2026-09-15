@@ -164,6 +164,24 @@ export default function ProfilePage() {
           onChange={(v) => setHealth({ dewormDate: v })} />
       </Section>
 
+      <Section title="AI 与扩展">
+        <button
+          onClick={() => nav('/settings')}
+          className="w-full flex items-center justify-between px-5 py-3.5 active:scale-[0.99] transition-transform"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="h-9 w-9 rounded-2xl bg-brand-50 grid place-items-center text-brand-500">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6 6l-1.5-1.5M19 19l-1.5-1.5M18 6l1.5-1.5M5 19l1.5-1.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+            </span>
+            <span className="text-sm font-medium text-ink-700">AI 模型设置</span>
+          </div>
+          <span className="text-ink-300 text-base">›</span>
+        </button>
+      </Section>
+
       <button
         onClick={() => setEdit((v) => !v)}
         className="mt-4 w-full rounded-2xl bg-brand-500 py-3.5 text-sm text-white font-medium shadow-card active:scale-[0.98]"

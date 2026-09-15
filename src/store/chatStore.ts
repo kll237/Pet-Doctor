@@ -5,6 +5,7 @@ import { makeSeedChat } from '@/data/seed'
 import { seedPets } from '@/data/seed'
 import { usePetStore } from '@/store/petStore'
 import { doctorReply } from '@/lib/aiDoctor'
+import { chatWithLLM, isLLMConfigured } from '@/lib/llm'
 
 interface ChatState {
   /** petId → 该宠物的问诊对话 */
@@ -40,9 +41,16 @@ export const useChatStore = create<ChatState>()(
           const list = s.byPet[pet.id] ?? []
           return { byPet: { ...s.byPet, [pet.id]: [...list, u] }, sending: true }
         })
-        // 模拟思考延迟
-        await new Promise((r) => setTimeout(r, 650 + Math.random() * 500))
-        const reply = doctorReply(text, get().byPet[pet.id] ?? [], pet.name)
+        // 思考延迟：LLM 模式更短（模型自身有延迟），兜底模式保留节奏感
+        await new Promise((r) => setTimeout(r, isLLMConfigured() ? 300 : 650 + Math.random() * 500))
+        let reply: string
+        try {
+          const history = (get().byPet[pet.id] ?? []).map((m) => ({ role: m.role, content: m.content }))
+          reply = await chatWithLLM(history, pet.name)
+        } catch {
+          // 未配置 key / 网络失败 → 回落规则兜底，保证始终有回答
+          reply = doctorReply(text, get().byPet[pet.id] ?? [], pet.name)
+        }
         const d: ChatMessage = {
           id: `m${Date.now() + 1}`,
           role: 'doctor',

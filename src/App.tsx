@@ -7,6 +7,7 @@ import LogPage from '@/pages/Log'
 import AIAnalysisPage from '@/pages/AIAnalysis'
 import TrendPage from '@/pages/Trend'
 import ProfilePage from '@/pages/Profile'
+import SettingsPage from '@/pages/Settings'
 import DailyReportPage from '@/pages/DailyReport'
 import MessagesPage from '@/pages/Messages'
 import RecordSheet from '@/components/RecordSheet'
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/ai" element={<AIAnalysisPage />} />
         <Route path="/trend" element={<TrendPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/summary" element={<DailyReportPage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

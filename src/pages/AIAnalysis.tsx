@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAnalysisStore } from '@/store/analysisStore'
@@ -6,6 +7,8 @@ import { useUIStore } from '@/store/uiStore'
 import { usePetStore, useCurrentPet } from '@/store/petStore'
 import { CATS } from '@/lib/cats'
 import { PetAvatar } from '@/components/PetAvatar'
+import { analyzePetImage } from '@/lib/aiDoctor'
+import { isLLMConfigured } from '@/lib/llm'
 import type { AIAnalysisRecord } from '@/types'
 
 const PARTS = ['眼睛', '耳朵', '鼻子', '口腔', '皮肤毛发', '整体状态']
@@ -22,12 +25,15 @@ const PARTS = ['眼睛', '耳朵', '鼻子', '口腔', '皮肤毛发', '整体�
 export default function AIAnalysisPage() {
   const currentId = usePetStore((s) => s.currentId)
   const pet = useCurrentPet()
+  const nav = useNavigate()
   const records = useAnalysisStore((s) => s.byPet[currentId] ?? [])
   const { add, remove } = useAnalysisStore()
   const { openSheet } = useUIStore()
   const fileRef = useRef<HTMLInputElement>(null)
   const [selectedPart, setSelectedPart] = useState<string>(PARTS[0])
   const [zoomed, setZoomed] = useState<AIAnalysisRecord | null>(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const visionReady = isLLMConfigured()
 
   /** 模拟每个部位对应的示例图（没有用户上传时用 demo 图占位） */
   const partDemo: Record<string, string> = {
@@ -39,18 +45,21 @@ export default function AIAnalysisPage() {
     整体状态: CATS.puddingSitting,
   }
 
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
     if (!f) return
     const r = new FileReader()
-    r.onload = () => {
+    r.onload = async () => {
       const url = r.result as string
+      setAnalyzing(true)
+      const { result, severity } = await analyzePetImage(url, selectedPart, pet.name)
+      setAnalyzing(false)
       add({
         date: dayjs().format('YYYY-MM-DD HH:mm'),
         thumb: url,                       // 用户上传的照片作为缩略图
         parts: [selectedPart],
-        result: resultTextFor(selectedPart),
-        severity: 'ok',
+        result,
+        severity,
         // 真实原图（DataURL）用于放大查看
         // @ts-expect-error custom field
         preview: url,
@@ -98,7 +107,15 @@ export default function AIAnalysisPage() {
         />
         <div className="rounded-3xl bg-white shadow-card px-5 py-5 text-center">
         <div className="text-sm font-semibold">上传/拍照分析 · 当前部位：<span className="text-brand-500">{selectedPart}</span></div>
-        <div className="mt-1 text-[11px] text-ink-400">选择要分析的部位后，点击相机上传{pet.name}的照片</div>
+        <div className="mt-1 text-[11px] text-ink-400">{analyzing ? 'AI 正在看照片…' : `选择要分析的部位后，点击相机上传${pet.name}的照片`}</div>
+        {!visionReady && (
+          <button
+            onClick={() => nav('/settings')}
+            className="mt-2 inline-flex items-center gap-1 rounded-full bg-warn/10 text-warn px-3 py-1 text-[11px] active:scale-95 transition-transform"
+          >
+            ⚠️ 尚未接入视觉模型，当前为通用建议 · 去设置填 key
+          </button>
+        )}
 
         <div className="mt-3 flex items-center justify-center gap-2">
           <PetAvatar
@@ -247,18 +264,6 @@ function PartIcon({ idx, active }: { idx: number; active?: boolean }) {
     <svg key="5" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 9l2-4 4 3 1-1 1 1 4-3 2 4-1 6c0 2-2 4-5 4s-5-2-5-4l-1-6z" fill="#3FA7E5"/></svg>,
   ]
   return icons[idx]
-}
-
-function resultTextFor(part: string) {
-  const map: Record<string, string> = {
-    眼睛: `${'宠物'}眼部轻微泪痕，建议每日擦拭`,
-    耳朵: `耳道有少量黄褐色分泌物，建议清洁`,
-    鼻子: `鼻部湿润，未见异常`,
-    口腔: `牙龈粉红，口腔状况良好`,
-    皮肤毛发: `毛发顺滑，无明显掉毛`,
-    整体状态: `整体状态良好，建议继续保持`,
-  }
-  return map[part] ?? '分析完成'
 }
 
 function mockAIResult() {

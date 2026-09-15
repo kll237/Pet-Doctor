@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@/types'
+import { visionWithLLM, isLLMConfigured } from '@/lib/llm'
 
 /**
  * 简易规则式 AI 医生"猫宁医生" — 模拟大模型回复。
@@ -110,4 +111,54 @@ export function suggestionsFor(petName: string): string[] {
     '怎么给猫做 7 日换粮过渡？',
     `${petName}眼睛有泪痕需要看医生吗？`,
   ]
+}
+
+/**
+ * 宠物照片健康分析入口。
+ * - 已配置视觉模型 key → 调用真实多模态大模型，基于用户上传的真实照片给出结论（不再受"选了哪个部位"摆布）。
+ * - 未配置 → 回落通用养护建议，并诚实标注"非针对本图判断"，预留真实视觉分支。
+ *
+ * 注意：以前 resultTextFor(part) 会按用户选中的部位返回固定模板，导致"同一张照片点耳朵和眼睛结论不同"——
+ * 这种假分析已被废除，focus 现在只是"请模型重点关注的部位"，结论由图像真实内容决定。
+ */
+export async function analyzePetImage(
+  imageDataUrl: string,
+  focus: string,
+  petName: string,
+): Promise<{ result: string; severity: 'ok' | 'warn' | 'alert' }> {
+  if (isLLMConfigured()) {
+    try {
+      const prompt =
+        `这是${petName}的一张宠物照片，请重点观察"${focus}"。` +
+        `请严格基于照片真实内容判断该部位/整体是否存在异常（泪痕、分泌物、红肿、皮肤、毛发、精神状态等），` +
+        `给出简短结论与护理建议；若正常请明确说明正常，不要编造问题。`
+      const text = await visionWithLLM(imageDataUrl, prompt, focus)
+      return { result: text, severity: severityFromText(text) }
+    } catch {
+      // 视觉调用失败 → 回落通用兜底
+    }
+  }
+  return { result: fallbackAnalysis(focus, petName), severity: 'ok' }
+}
+
+function severityFromText(t: string): 'ok' | 'warn' | 'alert' {
+  if (/紧急|立即就医|⚠️|血|不吃|尿闭|呼吸困难|抽搐/.test(t)) return 'alert'
+  if (/建议|注意|观察|就医|异常|红肿|分泌物|皮屑|泪痕/.test(t)) return 'warn'
+  return 'ok'
+}
+
+function fallbackAnalysis(focus: string, petName: string): string {
+  const tips: Record<string, string> = {
+    眼睛: '留意泪痕与眼屎，温水棉签每日清洁；出现黄脓眼屎提示结膜炎需就医。',
+    耳朵: '定期用宠物洗耳液清洁，黑褐干燥碎屑多为耳螨；频繁甩头抓耳要排查中耳炎。',
+    鼻子: '健康鼻头湿润微凉，干燥裂开或持续流涕需注意呼吸道感染。',
+    口腔: '每周检查牙龈是否粉红，口臭或牙龈红肿提示牙结石/口炎。',
+    皮肤毛发: '梳毛时观察掉毛与皮屑，局部红疹建议做皮肤刮片镜检。',
+    整体状态: '精神、食欲、排泄是健康三要素，三者任一持续异常请及时就医。',
+  }
+  const tip = tips[focus] ?? tips['整体状态']
+  return (
+    `【通用养护建议·非本图真实判断】关于"${focus}"：${tip}\n` +
+    `（当前未接入视觉模型，以上为通用建议。在"我的→AI 设置"填入 API key 后，这里会改为基于${petName}真实照片的分析。）`
+  )
 }
