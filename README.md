@@ -133,7 +133,7 @@
 | 类别 | 技术 |
 |------|------|
 | 框架 | React 18 + TypeScript 5 |
-| 构建 | Vite 5 |
+| 构建工具 | `Vite 5` |
 | 样式 | TailwindCSS 3（移动端 H5 自适应） |
 | 路由 | React Router 6（BrowserRouter） |
 | 状态管理 | Zustand 4（持久化到 localStorage） |
@@ -143,7 +143,7 @@
 | 日期 | dayjs |
 | 社区后端 | Node.js 内置 http + fs（零依赖） |
 | 天气 | Open-Meteo API（免 key） |
-| 大模型代理 | Vite 开发服务器中间件 `/api/llm` |
+| 大模型代理 | `Vite` 开发服务器中间件 `/api/llm` |
 
 ---
 
