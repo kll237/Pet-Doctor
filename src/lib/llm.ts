@@ -36,13 +36,32 @@ export const PROVIDER_PRESETS: Record<LLMProvider, { label: string; baseUrl: str
 export function loadLLMConfig(): LLMConfig | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const c = JSON.parse(raw) as LLMConfig
-    if (!c || !c.apiKey) return null
-    return c
+    if (raw) {
+      const c = JSON.parse(raw) as LLMConfig
+      if (c && c.apiKey) return c
+    }
   } catch {
-    return null
+    // ignore
   }
+  // 回退到本地 .env.local（VITE_LLM_API_KEY）：开发者本地免手动填写，
+  // 首次读取即把配置写回浏览器 localStorage，设置页也会显示"已配置"。
+  // 该 key 仅存在于本地 .env.local（已被 git 忽略），不会进代码仓库。
+  const envKey = (import.meta as any).env?.VITE_LLM_API_KEY as string | undefined
+  if (envKey && envKey.trim()) {
+    const cfg: LLMConfig = {
+      provider: 'zhipu',
+      apiKey: envKey.trim(),
+      baseUrl: PROVIDER_PRESETS.zhipu.baseUrl,
+      model: PROVIDER_PRESETS.zhipu.model,
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg))
+    } catch {
+      // ignore write-back failure
+    }
+    return cfg
+  }
+  return null
 }
 
 export function saveLLMConfig(c: LLMConfig) {
