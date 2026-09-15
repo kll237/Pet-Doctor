@@ -46,61 +46,41 @@
 
 <div align="center"><img src="docs/screenshots/home.png" width="300" alt="首页" /></div>
 
-### 2. 每日日志
+### 2. 每日记录
 
-按天记录宠物状态，支持日期切换。卡片展示当天各维度录入情况，点击进入对应录入面板。
+| 每日日志 | 日志录入 |
+|---|---|
+| <div align="center"><img src="docs/screenshots/daily-log.png" width="260" alt="每日日志" /></div> | <div align="center"><img src="docs/screenshots/log-entry.png" width="260" alt="日志录入" /></div> |
+| 按天记录宠物状态，支持日期切换。卡片展示当天各维度录入情况，点击进入对应录入面板。 | 以「精神与行为」为例，使用滑块评分和标签多选，覆盖活跃度、性格情绪、睡眠、异常行为等。保存后自动影响当日健康评分。 |
 
-<div align="center"><img src="docs/screenshots/daily-log.png" width="300" alt="每日日志" /></div>
+### 3. AI 照片分析
 
-### 3. 日志录入
+| AI 照片分析入口 | AI 分析结果 |
+|---|---|
+| <div align="center"><img src="docs/screenshots/ai-analysis.png" width="260" alt="AI 照片分析入口" /></div> | <div align="center"><img src="docs/screenshots/ai-analysis-result.png" width="260" alt="AI 分析结果" /></div> |
+| 选择要分析的部位后上传或拍照。分析结果会按部位生成观察结论和护理建议，并保留历史记录。 | 以耳朵分析结果为例，模型会给出耳道、外耳、精神状态等维度的观察，并列出护理建议。图片分析依赖所配置的大模型视觉能力，未配置 key 时会有明确提示。 |
 
-以「精神与行为」为例，使用滑块评分和标签多选，覆盖活跃度、性格情绪、睡眠、异常行为等。保存后自动影响当日健康评分。
+### 4. 健康与档案
 
-<div align="center"><img src="docs/screenshots/log-entry.png" width="300" alt="日志录入" /></div>
+| 健康趋势 | 宠物档案 |
+|---|---|
+| <div align="center"><img src="docs/screenshots/health-trend.png" width="260" alt="健康趋势" /></div> | <div align="center"><img src="docs/screenshots/pet-profile.png" width="260" alt="宠物档案" /></div> |
+| 支持 7 / 30 / 90 天维度切换，顶部为综合评分曲线，下方为食欲、饮水、排便、排尿、活跃度等指标的趋势小图。 | 展示当前选中宠物的基础信息，支持多宠物切换、添加 / 删除宠物、编辑饲养环境等。 |
 
-### 4. AI 照片分析
-
-选择要分析的部位后上传或拍照。分析结果会按部位生成观察结论和护理建议，并保留历史记录。
-
-<div align="center"><img src="docs/screenshots/ai-analysis.png" width="300" alt="AI 照片分析入口" /></div>
-
-### 5. AI 分析结果
-
-以耳朵分析结果为例，模型会给出耳道、外耳、精神状态等维度的观察，并列出护理建议。图片分析依赖所配置的大模型视觉能力，未配置 key 时会有明确提示。
-
-<div align="center"><img src="docs/screenshots/ai-analysis-result.png" width="300" alt="AI 分析结果" /></div>
-
-### 6. 健康趋势
-
-支持 7 / 30 / 90 天维度切换，顶部为综合评分曲线，下方为食欲、饮水、排便、排尿、活跃度等指标的趋势小图。
-
-<div align="center"><img src="docs/screenshots/health-trend.png" width="300" alt="健康趋势" /></div>
-
-### 7. 宠物档案
-
-展示当前选中宠物的基础信息，支持多宠物切换、添加 / 删除宠物、编辑饲养环境等。
-
-<div align="center"><img src="docs/screenshots/pet-profile.png" width="300" alt="宠物档案" /></div>
-
-### 8. 猫宁医生
+### 5. 猫宁医生
 
 全屏对话界面。支持文字提问，模型会结合宠物档案与日志上下文给出建议。问诊结果仅供参考，不能替代线下兽医诊断。
 
 <div align="center"><img src="docs/screenshots/ai-doctor-chat.png" width="300" alt="猫宁医生" /></div>
 
-### 9. 社区页
+### 6. 社区
 
-授权定位后展示附近的其他用户与帖子流。帖子按领养、救助、闲聊分类筛选，按发布时间倒序排列，显示距离。
+| 社区页 | 发布帖子 |
+|---|---|
+| <div align="center"><img src="docs/screenshots/community-feed.png" width="260" alt="社区页" /></div> | <div align="center"><img src="docs/screenshots/community-compose.png" width="260" alt="发布帖子" /></div> |
+| 授权定位后展示附近的其他用户与帖子流。帖子按领养、救助、闲聊分类筛选，按发布时间倒序排列，显示距离。 | 点击右下角「+」按钮弹出发布面板，先设置昵称（首次），再选择帖子类型、填写标题和正文即可发布。发布后帖子会立即出现在列表中。 |
 
-<div align="center"><img src="docs/screenshots/community-feed.png" width="300" alt="社区页" /></div>
-
-### 10. 发布帖子
-
-点击右下角「+」按钮弹出发布面板，先设置昵称（首次），再选择帖子类型、填写标题和正文即可发布。发布后帖子会立即出现在列表中。
-
-<div align="center"><img src="docs/screenshots/community-compose.png" width="300" alt="发布帖子" /></div>
-
-### 11. 底部黑猫互动
+### 7. 底部黑猫互动
 
 黑猫默认趴卧，点击会随机播放一段动画，例如吃饭、头顶冒爱心、伸懒腰、跑动，增加页面趣味性。
 
