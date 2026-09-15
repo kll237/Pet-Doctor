@@ -33,17 +33,20 @@ export default function BlackCatDoctor() {
   const NAV_H = 48
   const BTN = 72
   const [pos, setPos] = useState<{ x: number; y: number } | null>(doctorPos)
-  const dragRef = useRef({ sx: 0, sy: 0, bx: 0, by: 0, moved: false })
+  const posRef = useRef(pos)
+  posRef.current = pos
+  // dragging 标志：只有真正按住拖动时才跟随；松手立即清零，避免之后鼠标划过又拖动
+  const dragRef = useRef({ sx: 0, sy: 0, bx: 0, by: 0, moved: false, dragging: false })
   const onDragStart = (e: React.PointerEvent<HTMLButtonElement>) => {
     const shell = (e.currentTarget.closest('.phone-shell') as HTMLElement) ?? document.body
     const sr = shell.getBoundingClientRect()
     const r = e.currentTarget.getBoundingClientRect()
-    dragRef.current = { sx: e.clientX, sy: e.clientY, bx: r.left - sr.left, by: r.top - sr.top, moved: false }
+    dragRef.current = { sx: e.clientX, sy: e.clientY, bx: r.left - sr.left, by: r.top - sr.top, moved: false, dragging: true }
     e.currentTarget.setPointerCapture?.(e.pointerId)
   }
   const onDragMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     const d = dragRef.current
-    if (!d.sx) return
+    if (!d.dragging) return
     const dx = e.clientX - d.sx
     const dy = e.clientY - d.sy
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true
@@ -54,7 +57,12 @@ export default function BlackCatDoctor() {
     setPos({ x: nx, y: ny })
   }
   const onDragEnd = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (pos) setDoctorPos(pos)
+    const d = dragRef.current
+    d.dragging = false
+    d.sx = 0
+    d.sy = 0
+    // 用 posRef 取最新坐标提交，避免闭包里的 pos 滞后
+    if (posRef.current) setDoctorPos(posRef.current)
   }
   const onClickBtn = (e: React.MouseEvent) => {
     // 拖动过则不触发点开浮窗
